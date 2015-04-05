@@ -13,6 +13,8 @@ Once the project is built, running gulp will perform default development operati
 - live reload the window when css is saved
 - compile sass and minify javascript, as needed (configurable in gulpfile.js)
 
+What is Gulp? http://gulpjs.com/
+
 # One-time Setup
 
 Gulp Setup
