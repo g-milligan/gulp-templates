@@ -35,4 +35,4 @@ Gulp Templates Setup
 
 # New gulp project Setup
 
-- Run "gulpinit" in your command line. From here, the shell script will tell you what you need to know.
+- Run "gulpinit" in your command line. From here, the shell script will tell you what you need to know and help you create the new project from the chosen template.
