@@ -1,4 +1,4 @@
-# This a project generator
+# This a GULP project generator
 
 This is an implementation for deploying gulp project templates. As I create more templates, I will heap them into this repo.
 
