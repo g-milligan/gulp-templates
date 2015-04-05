@@ -29,7 +29,7 @@ This may help: http://travismaynard.com/writing/getting-started-with-gulp
 Gulp Templates Setup
 - Get this repo into your local computer. Or you can pick individual templates if you don't want all of them.
   - You will need the shell script "gulpinit" from this repo
-  - You will also need at least one template, one of the top level folders at the root of this repo, eg: "webgl"
+  - You will also need at least one template, (one of the top-level folders in this repo), eg: "webgl"
 - Modify the "gulpinit" file so that it knows the correct path to the root folder where you downloaded the templates. You will see where to set this path (at the top of the "gulpinit" file).
 - Add the shell script "gulpinit" to your path so that you can call it from anywhere in the command line.
 
