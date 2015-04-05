@@ -26,4 +26,7 @@ Once the project is built, running gulp will perform default development operati
 - Get this repo into your local computer. Or you can pick individual templates if you don't want all of them.
 - Modify the "gulpinit" file so that it knows the correct path to the root folder where you downloaded the templates. You will see where to set this path (at the top of the "gulpinit" file).
 - Add the shell script "gulpinit" to your path so that you can call it from anywhere in the command line.
+
+# New gulp project Setup
+
 - Run "gulpinit" in your command line. From here, the shell script will tell you what you need to know.
