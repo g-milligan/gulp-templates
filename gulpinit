@@ -1,9 +1,5 @@
 #!/bin/sh
 
-#npm install gulp gulp-util --save-dev
-#gulp-sass gulp-minify-css gulp-concat
-#http://gulpjs.com/plugins/
-
 #set the path to where all of your gulp templates exist
 TEMPLATES="/Users/[username]/gulpinit"
 
