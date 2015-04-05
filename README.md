@@ -16,10 +16,10 @@ node_modules install commands are required for the individual project.
 
 Once the project is built, running gulp will perform default development operations, such as:
 
--open the project in a browser tab
--automatically reload the browser when html or js is saved
--live reload the window when css is saved
--compile sass and minify javascript, as needed (configurable in gulpfile.js)
+- open the project in a browser tab when starting the gulp command
+- automatically reload the browser when html or js is saved
+- live reload the window when css is saved
+- compile sass and minify javascript, as needed (configurable in gulpfile.js)
 
 # Setup
 
