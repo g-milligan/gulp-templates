@@ -23,6 +23,10 @@ Once the project is built, running gulp will perform default development operati
 
 # One-time Setup
 
+Gulp Setup
+This may help: http://travismaynard.com/writing/getting-started-with-gulp
+
+Gulp Templates Setup
 - Get this repo into your local computer. Or you can pick individual templates if you don't want all of them.
 - Modify the "gulpinit" file so that it knows the correct path to the root folder where you downloaded the templates. You will see where to set this path (at the top of the "gulpinit" file).
 - Add the shell script "gulpinit" to your path so that you can call it from anywhere in the command line.
