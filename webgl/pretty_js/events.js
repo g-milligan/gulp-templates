@@ -4,6 +4,13 @@ TRIGGER MAIN EVENTS
 
 //when the document is ready
 document.addEventListener('DOMContentLoaded', function(){
+  //get key elements
+  var canvas=document.getElementById('canvas1');
+
+  //*** search for all gl-canvas-wrap classes and loop them
+  
+  //set canvas screen mode on page load
+  setScreenMode(canvas,1);
 
   //...
 

@@ -13,3 +13,11 @@
   -o-box-sizing: $defs;
   box-sizing: $defs;
 }
+
+@mixin borderradius($defs...){
+  -webkit-border-radius: $defs;
+  -moz-border-radius: $defs;
+  -ms-border-radius: $defs;
+  -o-border-radius: $defs;
+  -border-radius: $defs;
+}

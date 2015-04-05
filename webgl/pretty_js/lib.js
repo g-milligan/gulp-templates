@@ -54,3 +54,37 @@ function window_resize(func){
 		};
 	}
 }
+//remove class method
+function removeClass(el,classStr){
+	var removed=false;
+	//if element exists
+	if(el!=undefined){
+		if(el.classList){
+			if(el.classList.remove){
+				el.classList.remove(classStr);
+				removed=true;
+			}
+		}
+		if(!removed){
+			//*** fall back way of removing class
+		}
+	}
+	return el;
+}
+//add class method
+function addClass(el,classStr){
+	var added=false;
+	//if element exists
+	if(el!=undefined){
+		if(el.classList){
+			if(el.classList.add){
+				el.classList.add(classStr);
+				added=true;
+			}
+		}
+		if(!added){
+			//*** fall back way of adding class
+		}
+	}
+	return el;
+}
