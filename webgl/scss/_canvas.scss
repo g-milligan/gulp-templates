@@ -1,17 +1,42 @@
+/*default*/
 body{
-  #gl-canvas{
+  .gl-canvas-wrap{
     display:block;
+    width:50%;
+    height:50%;
+    margin:0 auto;
+    border:solid .1rem rgba(0,0,0,.2);
+    box-shadow:0 0 1rem rgba(0,0,0,.3);
+  }
+  .gl-canvas{
+    display:block;
+    width:100%;
+    height:100%;
     @include transition(width .2s linear, height .2s linear);
   }
 }
 
-body.full-screen{
-  #gl-canvas{
+/*fill screen area*/
+body.gl-fill-screen{
+  .gl-canvas-wrap{
     position:fixed;
     width:100%;
     height:100%;
     left:0;
     top:0;
     z-index:999;
+  }
+  .gl-canvas{
+
+  }
+}
+
+/*full screen*/
+body.gl-full-screen{
+  .gl-canvas-wrap{
+
+  }
+  .gl-canvas{
+
   }
 }

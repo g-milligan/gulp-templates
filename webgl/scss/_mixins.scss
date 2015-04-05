@@ -5,3 +5,11 @@
   -o-transition: $defs;
   transition: $defs;
 }
+
+@mixin boxsizing($defs...){
+  -webkit-box-sizing: $defs;
+  -moz-box-sizing: $defs;
+  -ms-box-sizing: $defs;
+  -o-box-sizing: $defs;
+  box-sizing: $defs;
+}

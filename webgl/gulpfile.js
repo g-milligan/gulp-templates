@@ -1,4 +1,4 @@
-isProduction=false; //use minified js if isProduction=true
+isProduction=false; //use minified js/css if isProduction=true
 
 //===============================================
 
@@ -47,10 +47,14 @@ gulp.task('join-crunch-js', function() {
 /* Sass task */
 gulp.task('compile-css', function () {
     gulp.src(['scss/*.scss'])
-    .pipe(sass({includePaths: ['./scss/']}).on('error', gutil.log))
+    .pipe(sass({
+      includePaths: ['./scss/'],
+      style:'expanded',
+      sourceComments:'normal'
+    }).on('error', gutil.log))
     .pipe(gulp.dest('dist/css'))
     .pipe(rename('styles.min.css'))
-    .pipe(minifycss())
+    .pipe(gulpif(isProduction, minifycss()))
     .pipe(gulp.dest('dist/css'))
     /* Reload the browser CSS after every change */
     .pipe(reload({stream:true}));
