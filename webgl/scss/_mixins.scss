@@ -1,0 +1,7 @@
+@mixin transition($defs...) {
+  -webkit-transition: $defs;
+  -moz-transition: $defs;
+  -ms-transition: $defs;
+  -o-transition: $defs;
+  transition: $defs;
+}

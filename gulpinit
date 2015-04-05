@@ -1,0 +1,191 @@
+#!/bin/sh
+
+#npm install gulp gulp-util --save-dev
+#gulp-sass gulp-minify-css gulp-concat
+#http://gulpjs.com/plugins/
+
+#set the path to where all of your gulp templates exist
+TEMPLATES="/Users/[username]/gulpinit"
+
+#shell commands
+CAT_CMD="$(command -v cat)"
+BASENAME_CMD="$(command -v basename)"
+CP_CMD="$(command -v cp)"
+GREP_CMD="$(command -v grep)"
+#colors
+NC='\033[0m' # No Color
+YELLOW='\033[33;33m'
+RED='\033[0;31m'
+BLUE='\033[33;34m'
+CYAN='\033[33;36m'
+#shell functions
+strip_trailing_slash(){
+  _PATH=$1
+  #strip trailing slashes
+  while [ "${_PATH%/}" != "$_PATH" ]; do
+    _PATH=${_PATH%/};
+  done
+  echo $_PATH
+}
+strip_start_slash(){
+  _PATH=$1
+  #strip start slashes
+  while [ "${_PATH#/}" != "$_PATH" ]; do
+    _PATH=${_PATH#/};
+  done
+  echo $_PATH
+}
+echo ""
+echo "=====[[${CYAN}GULP INIT${NC}]]====="
+echo "pwd > $(pwd)"
+GULP_ROOT="$1"
+#if a folder argument was NOT passed
+if [ $# -eq 0 ]
+then
+  #ask for the package folder value
+  GULP_ROOT_MSG="Specify a root folder (dot '.' = current folder) --> "
+  read -e -p "$GULP_ROOT_MSG" GULP_ROOT
+fi
+#argument was passed
+GULP_ROOT=$(strip_trailing_slash $GULP_ROOT)
+#while the folder isn't valid
+while [ ! -d "$GULP_ROOT" ]
+do
+  echo "$GULP_ROOT --> ${RED}doesn't exist.${NC}"
+  read -e -p "$GULP_ROOT_MSG" GULP_ROOT
+  GULP_ROOT=$(strip_trailing_slash $GULP_ROOT)
+done
+#get absolute directory paths
+CURRENT_DIR="$(pwd)"
+cd "$GULP_ROOT"
+GULP_ROOT="$(pwd)"
+#if NOT trying to build inside the templates directory
+TEMPLATES_LEN=${#TEMPLATES}
+if [ ! "$TEMPLATES" == "${GULP_ROOT:0:TEMPLATES_LEN}" ]
+then
+  GULPFILE="gulpfile.js"
+  echo "root > $GULP_ROOT "
+  #if the gulp file already exists
+  if [ -f "$GULP_ROOT/$GULPFILE" ]
+  then
+    echo ""
+    echo "${YELLOW}$GULPFILE${NC} --> ${RED}warning: already exists here.${NC}"
+    echo ""
+  fi
+  #print templates
+  echo "${CYAN}CHOOSE TEMPLATE:${NC} "
+  echo "from templates > $TEMPLATES"
+  cd "$TEMPLATES"
+  IS_FIRST=1
+  find $TEMPLATES -type d -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d $'\0' TP; do
+    TNAME=$($BASENAME_CMD "$TP")
+    #if not first template
+    if [ "$IS_FIRST" -ne 1 ]
+    then
+      printf " | "
+    fi
+    #print template name
+    printf "${YELLOW}$TNAME${NC}"
+    #if gulpfile.js doesn't exist
+    if [ ! -f "$TNAME/$GULPFILE" ]
+    then
+      printf "${RED}/!$GULPFILE${NC}"
+    fi
+    #not the first template
+    IS_FIRST=0
+  done
+  echo ""
+  #user must choose template
+  USE_TEM_MSG="use which template? --> "
+  read -e -p "$USE_TEM_MSG" COICE_TEMPLATE
+  COICE_TEMPLATE=$(strip_trailing_slash $COICE_TEMPLATE)
+  #while the folder isn't valid
+  while [ ! -d "$COICE_TEMPLATE" ]
+  do
+    echo "$COICE_TEMPLATE --> ${RED}doesn't exist.${NC}"
+    read -e -p "$USE_TEM_MSG" COICE_TEMPLATE
+    COICE_TEMPLATE=$(strip_trailing_slash $COICE_TEMPLATE)
+  done
+  echo "${CYAN}INIT TEMPLATE ($COICE_TEMPLATE):${NC} "
+  NODE_MOD_DIR="node_modules"
+  #copy from template folder into gulp root
+  echo "${YELLOW}create folders...${NC}"
+  find $COICE_TEMPLATE -type d -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d $'\0' DIRP; do
+    DIR=$($BASENAME_CMD "$DIRP")
+    #if NOT hidden directory like .git
+    if [ "$DIR" != ".git" ]
+    then
+      #if not node modules directory
+      if [ "$DIR" != "$NODE_MOD_DIR" ]
+      then
+        #if directory doesn't exist in the destination yet
+        if [ ! -d "$GULP_ROOT/$DIR" ]
+        then
+          echo "  create --> $DIR"
+          #copy folder
+          $CP_CMD -R "$TEMPLATES/$COICE_TEMPLATE/$DIR" "$GULP_ROOT"
+        else
+          echo "  ${RED}already exists${NC} --> $DIR"
+        fi
+      fi
+    else
+      echo "  ${RED}skip${NC} --> $DIR"
+    fi
+  done
+  #copy files into gulp root
+  echo "${YELLOW}create files...${NC}"
+  find $COICE_TEMPLATE -type f -maxdepth 1 -mindepth 1 -print0 | while IFS= read -r -d $'\0' FIP; do
+    FI=$($BASENAME_CMD "$FIP")
+    #if NOT .DS_Store .git
+    if [ "$FI" != ".DS_Store" ]
+    then
+      #if file doesn't exist in the destination yet
+      if [ ! -f "$GULP_ROOT/$FI" ]
+      then
+        echo "  create --> $FI"
+        #copy file
+        $CP_CMD "$TEMPLATES/$COICE_TEMPLATE/$FI" "$GULP_ROOT"
+      else
+        echo "  ${RED}already exists${NC} --> $FI"
+      fi
+    fi
+  done
+  #if there is a gulpfile.js
+  if [ -f "$GULP_ROOT/$GULPFILE" ]
+  then
+    echo "${CYAN}($COICE_TEMPLATE) $NODE_MOD_DIR DEPENDENCIES:${NC} "
+    #regex the required parts out of the file
+    REQUIRED=$($GREP_CMD -o 'require(.*)' "$GULP_ROOT/$GULPFILE")
+    while read -r LINE; do
+      #the line should start with "require" or something is wrong
+      REQ=${LINE:0:8}
+      if [ $REQ == "require(" ]
+      then
+        #get the value, eg: "gulp-util')"
+        VAL=${LINE:9}
+        VAL_LEN=${#VAL}
+        NEW_LEN=$VAL_LEN-2
+        #trim off the last two characters, "')"
+        VAL=${VAL:0:NEW_LEN}
+        #install command
+        INST_CMD="npm install gulp ${YELLOW}$VAL${NC} --save-dev"
+        #if this node module exists as a directory
+        if [ -d "$GULP_ROOT/$NODE_MOD_DIR/$VAL" ]
+        then
+          echo "${BLUE}  already exists --> ${NC}$INST_CMD"
+        else
+          echo "${RED}  run to install --> ${NC}$INST_CMD"
+        fi
+      fi
+    done <<< "$REQUIRED"
+
+  else
+    echo ""
+    echo "${RED}warning: $GULPFILE wasn't included in this template :( ${NC}"
+  fi
+else
+  echo "${RED}cannot do that --> ${NC}you can't create a new gulp project INSIDE the gulp templates folder... try again"
+fi
+echo ""
+#end the script
+exit 0
