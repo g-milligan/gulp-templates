@@ -33,9 +33,8 @@ Gulp Templates Setup
 
 # Project templates
 
-One webgl project scaffolding starter template, creatively named "webgl". 
-
 More template folders for different types of projects could easily be added. 
+
 They probably will.
 
 - webgl
