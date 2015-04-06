@@ -22,7 +22,7 @@ This may help: http://travismaynard.com/writing/getting-started-with-gulp
 
 Get "gulpinit" shell script
 ```
-curl "https://raw.githubusercontent.com/g-milligan/gulp-templates/master/gulpinit" -o "gulpinit"
+curl "https://raw.githubusercontent.com/g-milligan/gulp-templates/master/gulpinit" -o ~/gulpinit
 ```
 
 Gulp Templates Setup
