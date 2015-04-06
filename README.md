@@ -20,6 +20,11 @@ What is Gulp? http://gulpjs.com/
 Gulp Setup
 This may help: http://travismaynard.com/writing/getting-started-with-gulp
 
+Get "gulpinit" shell script
+```
+curl "https://raw.githubusercontent.com/g-milligan/gulp-templates/master/gulpinit" -o "gulpinit"
+```
+
 Gulp Templates Setup
 - Get this repo into your local computer. Or you can pick individual templates if you don't want all of them.
   - You will need the shell script "gulpinit" from this repo
