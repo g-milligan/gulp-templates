@@ -28,6 +28,10 @@ curl "https://raw.githubusercontent.com/g-milligan/gulp-templates/master/gulpini
 Get one of the gulp templates, eg "webgl"
 ```
 svn export https://github.com/g-milligan/gulp-templates/trunk/webgl webgl
+...
+Certificate information:
+...
+(R)eject, accept (t)emporarily or accept (p)ermanently?     t
 ```
 
 Gulp Templates Setup
