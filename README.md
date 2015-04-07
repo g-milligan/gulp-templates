@@ -25,6 +25,11 @@ Get "gulpinit" shell script
 curl "https://raw.githubusercontent.com/g-milligan/gulp-templates/master/gulpinit" -o /usr/local/bin/gulpinit
 ```
 
+Get one of the gulp templates, eg "webgl"
+```
+svn export https://github.com/g-milligan/gulp-templates/trunk/webgl webgl
+```
+
 Gulp Templates Setup
 - Get this repo into your local computer. Or you can pick individual templates if you don't want all of them.
   - You will need the shell script "gulpinit" from this repo
