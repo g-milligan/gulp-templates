@@ -59,14 +59,16 @@ function removeClass(el,classStr){
 	var removed=false;
 	//if element exists
 	if(el!=undefined){
-		if(el.classList){
-			if(el.classList.remove){
-				el.classList.remove(classStr);
-				removed=true;
+		if(classStr!=undefined&&typeof classStr==='string'){
+			if(el.classList){
+				if(el.classList.remove){
+					el.classList.remove(classStr);
+					removed=true;
+				}
 			}
-		}
-		if(!removed){
-			//*** fall back way of removing class
+			if(!removed){
+				//*** fall back way of removing class
+			}
 		}
 	}
 	return el;
@@ -76,14 +78,16 @@ function addClass(el,classStr){
 	var added=false;
 	//if element exists
 	if(el!=undefined){
-		if(el.classList){
-			if(el.classList.add){
-				el.classList.add(classStr);
-				added=true;
+		if(classStr!=undefined&&typeof classStr==='string'){
+			if(el.classList){
+				if(el.classList.add){
+					el.classList.add(classStr);
+					added=true;
+				}
 			}
-		}
-		if(!added){
-			//*** fall back way of adding class
+			if(!added){
+				//*** fall back way of adding class
+			}
 		}
 	}
 	return el;
@@ -93,14 +97,34 @@ function hasClass(el,classStr){
 	var has=false; var useContains=false;
 	//if element exists
 	if(el!=undefined){
-		if(el.classList){
-			if(el.classList.contains){
-				has=el.classList.contains(classStr);
-				useContains=true;
+		if(classStr!=undefined&&typeof classStr==='string'){
+			if(el.classList){
+				if(el.classList.contains){
+					has=el.classList.contains(classStr);
+					useContains=true;
+				}
 			}
-		}
-		if(!useContains){
-			//*** fall back way of checking class
+			if(!useContains){
+				//fall back way of checking class
+				var elClass=el.className;
+				//if the class name contains the given classStr
+				if(elClass.indexOf(classStr)!==-1){
+					//for each class item
+					var classArray=elClass.split(' ');
+					for(var c=0;c<classArray.length;c++){
+						//if this class name isn't empty
+						var aClass=classArray[c]; aClass=aClass.trim();
+						if(aClass.length>0){
+							//if this class is the target class
+							if(aClass===classStr){
+								//yes, has class. Stop looking
+								has=true;
+								break;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return has;

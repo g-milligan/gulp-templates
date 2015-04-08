@@ -76,7 +76,16 @@ document.addEventListener('DOMContentLoaded', function(){
               wrap:canvasWrap,
               canvas:canvas,
               setScreenMode:screenMode,
-              getScreenMode:function(){return canvasWrap['screenMode'];},
+              getScreenMode:function(){
+                var smode=1;
+                if((screen.availHeight||screen.height-30)<=window.innerHeight){
+                    // browser is almost certainly fullscreen
+                    smode=3;
+                }else{
+                  //not in full screen, get the mode from the canvas wrap
+                  smode=canvasWrap['screenMode'];
+                }return smode;
+              },
               modesWrap:screenModes,
               modeButtons:mBtns
             });
