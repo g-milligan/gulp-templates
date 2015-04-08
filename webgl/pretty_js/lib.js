@@ -88,3 +88,66 @@ function addClass(el,classStr){
 	}
 	return el;
 }
+//has class method
+function hasClass(el,classStr){
+	var has=false; var useContains=false;
+	//if element exists
+	if(el!=undefined){
+		if(el.classList){
+			if(el.classList.contains){
+				has=el.classList.contains(classStr);
+				useContains=true;
+			}
+		}
+		if(!useContains){
+			//*** fall back way of checking class
+		}
+	}
+	return has;
+}
+//is tag method
+function isTag(el,tag){
+	var is=false;
+	//if element exists
+	if(el!=undefined){
+		if(el.tagName){
+			if(tag!=undefined&&typeof tag==='string'){
+				tag=tag.toLowerCase();
+				if(el.tagName.toLowerCase()===tag){
+					is=true;
+				}
+			}
+		}
+	}
+	return is;
+}
+//add inline style function
+function css(el,attr,val){
+	if(el.style){
+		if(el.style.hasOwnProperty(attr)){
+			el.style[attr]=val;
+		}
+	}
+	return el;
+}
+//pass a canvas wrap or number to get the array item canvas data for that number
+function getCanvasData(wrap){
+	var data;
+	if(document.body.hasOwnProperty('glCanvasList')){
+		if(typeof wrap==='number'){
+			if(document.body.glCanvasList.length>=wrap){
+				if(wrap>0){
+					data=document.body.glCanvasList[wrap-1];
+				}
+			}
+		}else{
+			if(wrap.hasOwnProperty('canvasId')){
+	      var id=wrap.canvasId;
+	      if(document.body.glCanvasList.length>=id){
+					data=document.body.glCanvasList[id-1];
+				}
+			}
+		}
+	}
+	return data;
+}
