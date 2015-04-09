@@ -105,9 +105,9 @@ document.addEventListener('DOMContentLoaded', function(){
       setCanvasFill(glCanvasList[c].wrap);
     }
     //if not initial page load
-    if(isPageLoad){
+    if(!isPageLoad){
       //call the main resize functionality
-      onWindowResize(glCanvasList);
+      onCanvasResize();
     }
   };
   window_resize(function(){
@@ -119,6 +119,6 @@ document.addEventListener('DOMContentLoaded', function(){
   //execute resize on load
   handle_resize(true);
   //execute main logic on page load
-  onPageLoad(glCanvasList);
+  onPageLoad();
   //end document ready
 });

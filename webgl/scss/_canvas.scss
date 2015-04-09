@@ -16,6 +16,7 @@ $canvas-btns-fade: .6;
     position:absolute;
     right:0;
     top:0;
+    height:$canvas-btns-size;
     display:block;
     font-size:0;
     background-color:$co-solid-trim-bg;
@@ -126,7 +127,7 @@ $canvas-btns-fade: .6;
     text-align:right;
     top:-$canvas-btns-size;
     .small-screen, .fill-screen, .full-screen{
-
+      margin-top:0;
     }
     .small-screen{
 

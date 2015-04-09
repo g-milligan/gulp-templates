@@ -28,8 +28,8 @@ gulp.task('join-crunch-js', function() {
 
   var joincrunch=gulp.src([
       'pretty_js/lib.js',
-      'pretty_js/screen-mode.js',
       'pretty_js/main.js',
+      'pretty_js/screen-mode.js',
       'pretty_js/events.js',
       '!pretty_js/shaders.js'
     ])

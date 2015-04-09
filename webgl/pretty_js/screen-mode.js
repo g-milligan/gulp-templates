@@ -1,4 +1,5 @@
 //sets the screen mode, "small", "fill", or "full"
+var canvas_resize_timeout;
 function setScreenMode(wrap,mode){
   var ret=1;
   if(wrap!=undefined){
@@ -43,6 +44,12 @@ function setScreenMode(wrap,mode){
           }
           //update inline height css
           setCanvasFill(wrap);
+          //after a delay
+          clearTimeout(canvas_resize_timeout);
+          canvas_resize_timeout=setTimeout(function(){
+            //call the function to handle canvas resize
+            onCanvasResize();
+          },800);
         }
       }
     }
