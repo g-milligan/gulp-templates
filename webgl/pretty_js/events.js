@@ -97,20 +97,28 @@ document.addEventListener('DOMContentLoaded', function(){
   //set the list of validated canvas wrap objects
   document.body['glCanvasList']=glCanvasList;
   //handle window resize
-  var handle_resize=function(){
+  var handle_resize=function(isPageLoad){
+    if(isPageLoad==undefined){isPageLoad=false;}
     //make sure the canvas heights are correct
     for(var c=0;c<glCanvasList.length;c++){
       //set canvas fill height
       setCanvasFill(glCanvasList[c].wrap);
     }
+    //if not initial page load
+    if(isPageLoad){
+      //call the main resize functionality
+      onWindowResize(glCanvasList);
+    }
   };
   window_resize(function(){
     //do once to prevent multiple success event triggers (on drag resize window)
     do_once(function(){
-      handle_resize();
+      handle_resize(false);
     });
   });
   //execute resize on load
-  handle_resize();
+  handle_resize(true);
+  //execute main logic on page load
+  onPageLoad(glCanvasList);
   //end document ready
 });
