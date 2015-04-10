@@ -28,7 +28,7 @@ gulp.task('join-crunch-js', function() {
 
   var joincrunch=gulp.src([
       'pretty_js/lib.js',
-      'pretty_js/start-web-gl.js',
+      'pretty_js/webgl-helper.js',
       'pretty_js/main.js',
       'pretty_js/screen-mode.js',
       'pretty_js/events.js',
@@ -39,6 +39,25 @@ gulp.task('join-crunch-js', function() {
     .pipe(gulp.dest('dist/js'))
     //minify the joined file --> scripts.min.js
     .pipe(rename('scripts.min.js'))
+    .pipe(gulpif(isProduction, uglify()))
+    .pipe(gulp.dest('dist/js'));
+
+    return joincrunch;
+
+});
+
+//minify and concat selected VENDOR .js files --> also copy to distribution folder
+gulp.task('join-crunch-vendor-js', function() {
+
+  var joincrunch=gulp.src([
+      'vendor_js/sylvester.js',
+      'vendor_js/glUtils.js'
+    ])
+    //join scripts into one file
+    .pipe(concat('vendor.js'))
+    .pipe(gulp.dest('dist/js'))
+    //minify the joined file
+    .pipe(rename('vendor.min.js'))
     .pipe(gulpif(isProduction, uglify()))
     .pipe(gulp.dest('dist/js'));
 
@@ -63,7 +82,7 @@ gulp.task('compile-css', function () {
 });
 
 //prepend shaders.js to the minified script file
-gulp.task('compile-js', ['join-crunch-js'], function(){
+gulp.task('compile-js', ['join-crunch-vendor-js', 'join-crunch-js'], function(){
   return gulp.src(['pretty_js/shaders.js','dist/js/scripts.min.js'])
   .pipe(concat('scripts.min.js'))
   .pipe(gulp.dest('dist/js'));

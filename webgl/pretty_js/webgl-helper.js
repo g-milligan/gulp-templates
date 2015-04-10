@@ -63,3 +63,54 @@ function onCanvasResize(){
     }
   }
 }
+
+//create/initialize a shader program
+function initShaderProgram(ctx,shaderName,shaderType){
+  var shaderProgram;
+  //if context is given
+  if(ctx!=undefined&&ctx.createProgram){
+    //try to get the shader program string
+    var shaderStr='';
+    switch(shaderType){
+      case 'vertex':
+        shaderStr=vshader(shaderName);
+        break;
+      case 'fragment':
+        shaderStr=fshader(shaderName);
+        break;
+    }
+    //if the shader program, by name, did exist
+    if(shaderStr.length>0){
+      //init a blank program object
+      shaderProgram=ctx.createProgram();
+      //bind the shader program to both the shader string and the context object
+      ctx.attachShader(shaderProgram,shaderStr);
+      //finish bind
+      ctx.linkProgram(shaderProgram);
+      //if the program failed somehow
+      if (!ctx.getProgramParameter(shaderProgram,ctx.LINK_STATUS)){
+        //uh oh... something went wrong with the shader program
+        console.log('Unable to initialize the "'+shaderType+'" shader program.');
+        shaderProgram=undefined;
+      }
+    }
+  }
+  //return
+  return shaderProgram;
+}
+//function used to grab vertext shader program strings from function bodies
+function vshader(name){
+  return getFuncStr('vertex_shader_'+name);
+}
+//function to int a vertex shader program object
+function vsprogram(ctx,name){
+  return initShaderProgram(ctx,name,'vertex');
+}
+//function used to grab fragment shader program strings from function bodies
+function fshader(name){
+  return getFuncStr('fragment_shader_'+name);
+}
+//function to init a fragment shader program object
+function fsprogram(ctx,name){
+  return initShaderProgram(ctx,name,'fragment');
+}

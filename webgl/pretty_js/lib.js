@@ -22,14 +22,6 @@ function getFuncStr(functionName){
 	}
 	return functionContent;
 }
-//function used to grab vertext shader program strings from function bodies
-function vshader(name){
-  return getFuncStr('vertex_shader_'+name);
-}
-//function used to grab fragment shader program strings from function bodies
-function fshader(name){
-  return getFuncStr('fragment_shader_'+name);
-}
 //fire an event once instead of multiple successive times
 var do_once_timeout;
 function do_once(func){
