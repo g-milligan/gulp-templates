@@ -1,3 +1,7 @@
+/* ====================================================================
+HANDLE SWITCHING BETWEEN DIFFERENT SCREEN MODES ('small','fill','full')
+======================================================================= */
+
 //sets the screen mode, "small", "fill", or "full"
 var canvas_resize_timeout;
 function setScreenMode(wrap,mode){
