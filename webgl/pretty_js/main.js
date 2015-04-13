@@ -17,6 +17,8 @@ function onPageLoad(){
     ctx.depthFunc(ctx.LEQUAL);                                // Near things obscure far things
     ctx.clear(ctx.COLOR_BUFFER_BIT|ctx.DEPTH_BUFFER_BIT);      // Clear the color as well as the depth buffer.
 
+    //NOTE a shader program is a combination of a fragment and vertex shader
+
     //create a program and add shaders to it
     new_program(ctx);
     var vshader = add_vshader(ctx,'square');
@@ -88,11 +90,13 @@ function onPageLoad(){
         ctx.vertexAttribPointer(vertexPositionAttribute, 3, ctx.FLOAT, false, 0, 0);
         setMatrixUniforms(ctx,program);
         ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
-      }
+      };
+      document.body['drawScene']=drawScene;
 
       //////////////////
 
-      setInterval(drawScene, 15);
+      //setInterval(drawScene, 15);
+      drawScene();
     }
   }
 }
