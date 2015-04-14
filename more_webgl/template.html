@@ -18,11 +18,6 @@
 // [/webgl-utils.js]
 </script>
 
-<script name="main" type="text/javascript">
-// [main.js]
-// [/main.js]
-</script>
-
 <script id="v-shader" type="x-shader/x-vertex">
 // [shader.vert]
 // [/shader.vert]
@@ -31,6 +26,13 @@
 <script id="f-shader" type="x-shader/x-fragment">
 // [shader.frag]
 // [/shader.frag]
+</script>
+
+<script name="main" type="text/javascript">
+var canvas=document.getElementById('canvas');
+var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+// [main.js]
+// [/main.js]
 </script>
 
 </body>
