@@ -21,7 +21,7 @@ var gulpif = require('gulp-if');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
-var htmlStr, htmlChangeTrigger;
+var htmlStr, htmlChangeTrigger, projectFiles;
 var htmlReloadTasks=['start', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
 //load the html string that will modified by having external file content combined-inserted into it
 var loadHtmlStr=function(loadTrigger){
@@ -51,17 +51,60 @@ var loadHtmlStr=function(loadTrigger){
       //remember which load trigger loaded the html
       htmlChangeTrigger=loadTrigger;
     }
+    //init an empty array of project files
+    projectFiles=[];
   }
+};
+//insert a list of project files that can be used to "unpack" the separate files from the single distribution .html file
+var insertProjectFilesList=function(html,filesList){
+  var ret={newHtml:'',projectListStr:''};
+  var closeBody='</body>'; var projListStr='';
+  //if there is a closing body tag in there
+  if(html.indexOf(closeBody)!==-1){
+    //remove the project files from the htmlStr
+    var startProjFiles='\n <!-- [@project files] \n';
+    var endProjFiles='\n [/@project files] --> \n';
+    if(html.lastIndexOf(startProjFiles)!==-1){
+      if(html.lastIndexOf(endProjFiles)!==-1){
+        var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
+        var afterProjFiles=html.substring(html.lastIndexOf(endProjFiles)+endProjFiles.length);
+        html=beforeProjFiles+afterProjFiles;
+      }
+    }
+    //if there are any project files
+    if(filesList!=undefined&&filesList.length>0){
+      //for each project file
+      for(var p=0;p<filesList.length;p++){
+        var file=filesList[p];
+        if(p!==0){projListStr+=', ';}
+        if(file.indexOf('./')===0){file=file.substring('./'.length);}
+        projListStr+='"'+file+'"';
+      }
+      //insert the project files list string before the closing body tag
+      var beforeClose=html.substring(0,html.lastIndexOf(closeBody));
+      var atClose=html.substring(html.lastIndexOf(closeBody));
+      html=beforeClose+startProjFiles+'{"files":['+projListStr+']}'+endProjFiles+atClose;
+    }
+  }
+  ret.newHtml=html;
+  ret.projectListStr=projListStr;
+  return ret;
 };
 //when the htmlStr has all of the updated file content inserted, write this changed string into the file
 var writeHtmlStr=function(callTrigger){
   //if this is the correct end action to trigger the finishing write event
   if(callTrigger===htmlChangeTrigger){
+    //write the inserted project files into the htmlStr
+    projList=insertProjectFilesList(htmlStr,projectFiles);
+    htmlStr=projList.newHtml;
     //write the modified html to the file
     fs.writeFileSync('./dist/index.html', htmlStr);
     console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++');
     console.log('+++ HTML updated after "'+htmlChangeTrigger+'" +++');
+    console.log('COMBINED('+projectFiles.length+'): '+projList.projectListStr);
     console.log('+++++++++++++++++++++++++++++++++++++++++++++++++++++');
+    //reset the project files list for next time
+    projectFiles=undefined;
     //reset the html for next time
     htmlStr=undefined;
     //reset the trigger for next time
@@ -126,6 +169,8 @@ var insertIntoHtml=function(html,path,allowedExt){
             var afterReplace=html.substring(beforeReplace.length+replaceThis.length);
             //replace the string
             html=beforeReplace+content+afterReplace;
+            //record this as one of the project files
+            projectFiles.push(path+file);
           }
         }
       }
