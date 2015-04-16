@@ -242,12 +242,24 @@ gulp.task('serve', htmlReloadTasks, function() {
 //pass the name of an html file, this task will read the project files and
 //try to separate out the project files into different "unpacked" files
 gulp.task('unpack', function(){
-  var fileName='index'; //*** argv.[file name]
+  var fileName='index';
+  //try to get the file name from argv
+  for(var key in argv){
+    if(argv.hasOwnProperty(key)){
+      if(key.length>0&&key.indexOf('$')!==0&&key.indexOf('_')!==0){
+        //use this param name as the fileName
+        fileName=key;
+        break;
+      }
+    }
+  }
   var path='./dist/'+fileName+'.html';
   if (fs.existsSync(path)){
+    //if the project files json could be found in this html
     var html=fs.readFileSync(path, 'utf8');
     var projJson=getProjectFilesJson(html);
     if(projJson!=undefined){
+
       console.log('success *** '+projJson.files);
     }else{
       console.log('Project tags not found in '+path+': '+startProjFiles.trim()+' ... '+endProjFiles.trim());
