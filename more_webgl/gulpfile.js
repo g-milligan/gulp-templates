@@ -14,6 +14,7 @@ note: to install additional required node plugins run command
 */
 var fs = require('fs');
 var gutil = require('gulp-util');
+var argv = require('yargs').argv;
 var replace = require('gulp-replace');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
@@ -23,6 +24,9 @@ var reload = browserSync.reload;
 
 var htmlStr, htmlChangeTrigger, projectFiles;
 var htmlReloadTasks=['start', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
+
+var startProjFiles='\n <!-- [@project] \n';
+var endProjFiles='\n [/@project] --> \n';
 //load the html string that will modified by having external file content combined-inserted into it
 var loadHtmlStr=function(loadTrigger){
   //if the html isn't loaded yet
@@ -55,6 +59,19 @@ var loadHtmlStr=function(loadTrigger){
     projectFiles=[];
   }
 };
+//get the project files from an html string, return json object
+var getProjectFilesJson=function(html){
+  var json;
+  if(html.lastIndexOf(startProjFiles)!==-1){
+    if(html.lastIndexOf(endProjFiles)!==-1){
+      var jsonStr=html.substring(html.lastIndexOf(startProjFiles)+startProjFiles.length);
+      jsonStr=jsonStr.substring(0,jsonStr.lastIndexOf(endProjFiles));
+      jsonStr=jsonStr.trim();
+      json=JSON.parse(jsonStr);
+    }
+  }
+  return json;
+};
 //insert a list of project files that can be used to "unpack" the separate files from the single distribution .html file
 var insertProjectFilesList=function(html,filesList){
   var ret={newHtml:'',projectListStr:''};
@@ -62,8 +79,6 @@ var insertProjectFilesList=function(html,filesList){
   //if there is a closing body tag in there
   if(html.indexOf(closeBody)!==-1){
     //remove the project files from the htmlStr
-    var startProjFiles='\n <!-- [@project files] \n';
-    var endProjFiles='\n [/@project files] --> \n';
     if(html.lastIndexOf(startProjFiles)!==-1){
       if(html.lastIndexOf(endProjFiles)!==-1){
         var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
@@ -223,6 +238,23 @@ gulp.task('serve', htmlReloadTasks, function() {
     gulp.watch("glsl/*.frag", ['fragment-shader-reload']);
     gulp.watch("template.html", ['html-reload']);
     gulp.watch("css/*.css", ['css-reload']);
+});
+//pass the name of an html file, this task will read the project files and
+//try to separate out the project files into different "unpacked" files
+gulp.task('unpack', function(){
+  var fileName='index'; //*** argv.[file name]
+  var path='./dist/'+fileName+'.html';
+  if (fs.existsSync(path)){
+    var html=fs.readFileSync(path, 'utf8');
+    var projJson=getProjectFilesJson(html);
+    if(projJson!=undefined){
+      console.log('success *** '+projJson.files);
+    }else{
+      console.log('Project tags not found in '+path+': '+startProjFiles.trim()+' ... '+endProjFiles.trim());
+    }
+  }else{
+    console.log('Doesn\'t exist: "'+path+'"');
+  }
 });
 //the default action will open a browser window for the index.html file
 gulp.task('default', ['serve']);
