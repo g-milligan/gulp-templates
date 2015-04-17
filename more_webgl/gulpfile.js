@@ -128,6 +128,47 @@ var writeHtmlStr=function(callTrigger){
     browserSync.reload();
   }
 };
+//get the start/end token for inserted file content
+var getStartToken=function(fname){
+  return '['+fname+']';
+};
+var getEndToken=function(fname){
+  return '[/'+fname+']';
+};
+//get the content in three parts 1) before insert content 2) insert content 3) after insert content
+var getSplitContent=function(html,fname){
+  var returnParts;
+  //indicators for start and end of the string to insert
+  var startToken=getStartToken(fname);
+  var endToken=getEndToken(fname);
+  //if both start and end tokens are in the file
+  if(html.indexOf(startToken)!==-1){
+    if(html.indexOf(endToken)!==-1){
+      var startIndex=0;
+      //get the string before and including the line that contains the starting insert token
+      var parts=html.split(startToken);
+      if(parts.length>1){
+        //get the string before the content to replace
+        var beforeReplace=html.substring(0,parts[0].length+startToken.length);
+        var beforeNewline=html.substring(beforeReplace.length);
+        beforeNewline=beforeNewline.substring(0,beforeNewline.indexOf("\n")+1);
+        beforeReplace+=beforeNewline;
+        //split off the string after the end token
+        var moreParts=parts[1].split(endToken);
+        var replaceThis=moreParts[0];
+        //remove first newline
+        replaceThis=replaceThis.substring(replaceThis.indexOf("\n")+1);
+        //remove last newline
+        replaceThis=replaceThis.substring(0,replaceThis.lastIndexOf("\n"));
+        //get the string after the replaceThis string
+        var afterReplace=html.substring(beforeReplace.length+replaceThis.length);
+        //assemble the three parts
+        returnParts=[beforeReplace,replaceThis,afterReplace];
+      }
+    }
+  }
+  return returnParts;
+};
 //insert the external file content into the html depending on the location of placement tokens
 var insertIntoHtml=function(html,path,allowedExt){
   //for each file in the target directory
@@ -156,38 +197,15 @@ var insertIntoHtml=function(html,path,allowedExt){
     }
     //if this file has an allowed extension
     if(isAllowedExt){
-      //indicators for start and end of the string to insert
-      var startToken='['+file+']';
-      var endToken='[/'+file+']';
-      //if both start and end tokens are in the file
-      if(html.indexOf(startToken)!==-1){
-        if(html.indexOf(endToken)!==-1){
-          //get the file content
-          var content=fs.readFileSync(path+file, 'utf8');
-          var startIndex=0;
-          //get the string before and including the line that contains the starting insert token
-          var parts=html.split(startToken);
-          if(parts.length>1){
-            //get the string before the content to replace
-            var beforeReplace=html.substring(0,parts[0].length+startToken.length);
-            var beforeNewline=html.substring(beforeReplace.length);
-            beforeNewline=beforeNewline.substring(0,beforeNewline.indexOf("\n")+1);
-            beforeReplace+=beforeNewline;
-            //split off the string after the end token
-            var moreParts=parts[1].split(endToken);
-            var replaceThis=moreParts[0];
-            //remove first newline
-            replaceThis=replaceThis.substring(replaceThis.indexOf("\n")+1);
-            //remove last newline
-            replaceThis=replaceThis.substring(0,replaceThis.lastIndexOf("\n"));
-            //get the string after the replaceThis string
-            var afterReplace=html.substring(beforeReplace.length+replaceThis.length);
-            //replace the string
-            html=beforeReplace+content+afterReplace;
-            //record this as one of the project files
-            projectFiles.push(path+file);
-          }
-        }
+      //if there is a file section inserted in the html
+      var contentParts=getSplitContent(html,file);
+      if(contentParts!=undefined){
+        //get the file content
+        var content=fs.readFileSync(path+file, 'utf8');
+        //replace the string, contentParts[1]
+        html=contentParts[0]+content+contentParts[2];
+        //record this as one of the project files
+        projectFiles.push(path+file);
       }
     }
   }
@@ -259,8 +277,25 @@ gulp.task('unpack', function(){
     var html=fs.readFileSync(path, 'utf8');
     var projJson=getProjectFilesJson(html);
     if(projJson!=undefined){
-
-      console.log('success *** '+projJson.files);
+      //for each project file
+      for(var f=0;f<projJson.files.length;f++){
+        //get the file path
+        var fpath=projJson.files[f];
+        //get just the file name
+        var fname=fpath;
+        if(fname.lastIndexOf('/')!==0){
+          fname=fname.substring(fname.lastIndexOf('/')+'/'.length);
+        }
+        //get the file content, embedded as part of the html
+        var contentParts=getSplitContent(html,fname);
+        //if this file has embedded content
+        if(contentParts!=undefined){
+          console.log('[unpack] '+fpath);
+          //***
+        }else{
+          console.log('"'+fpath+'" is named within the project files, but doesn\'t appear within the '+fileName+'.html');
+        }
+      }
     }else{
       console.log('Project tags not found in '+path+': '+startProjFiles.trim()+' ... '+endProjFiles.trim());
     }
