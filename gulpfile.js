@@ -339,28 +339,36 @@ gulp.task('serve', htmlReloadTasks, function() {
   gulpServe();
 });
 //updates/compiles current index.html packages then renames the index.html to a new package name
-var gulpPack=function(newPackName){
+var gulpPack=function(newPackName,isPackAs){
+  if(isPackAs==undefined){isPackAs=false;}
   //if there is a package name given
   if(newPackName!=undefined){
     //if the package name is not index
     if(newPackName!=='index'){
       console.log('packing current project...');
-      //if a current dist/index.html file is already there (current unpacked project)
-      if(fs.existsSync('./dist/index.html')){
-        //get the html of the current unpacked project (this one)
-        var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
-        //get the project json of this project
-        var thisProjJson=getProjectFilesJson(thisHtml);
-        if(thisProjJson!=undefined){
-          //if this project is named
-          if(thisProjJson.hasOwnProperty('name')){
-            //if this newPackName is different from the previous, thisProjJson.name (if renaming package)
-            if(thisProjJson.name!==newPackName){
-              //if this previous package name exists
-              if(fs.existsSync('./dist/'+thisProjJson.name+'.html')){
-                //delete previous package file
-                console.log('DISCARD PACKAGE NAME --> '+thisProjJson.name+'.html');
-                fs.unlinkSync('./dist/'+thisProjJson.name+'.html');
+      //if create this package as (like save as)
+      if(isPackAs){
+
+      }else{
+        //rename this package if has already been packed...
+
+        //if a current dist/index.html file is already there (current unpacked project)
+        if(fs.existsSync('./dist/index.html')){
+          //get the html of the current unpacked project (this one)
+          var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
+          //get the project json of this project
+          var thisProjJson=getProjectFilesJson(thisHtml);
+          if(thisProjJson!=undefined){
+            //if this project is named
+            if(thisProjJson.hasOwnProperty('name')){
+              //if this newPackName is different from the previous, thisProjJson.name (if renaming package)
+              if(thisProjJson.name!==newPackName){
+                //if this previous package name exists
+                if(fs.existsSync('./dist/'+thisProjJson.name+'.html')){
+                  //delete previous package file
+                  console.log('DISCARD PACKAGE NAME --> '+thisProjJson.name+'.html');
+                  fs.unlinkSync('./dist/'+thisProjJson.name+'.html');
+                }
               }
             }
           }
@@ -393,16 +401,75 @@ var gulpPack=function(newPackName){
     console.log('\tgulp pack --{name-of-your-html-file} \n');
   }
 };
-//gulp task to package a project into a compiled .html file
+//gulp task to package a project into a compiled .html file (save-as)
+gulp.task('packas', function(){
+  //if package name provided
+  var newPackName=getYargKey(argv);
+  if(newPackName!=undefined){
+    //do pack
+    gulpPack(newPackName,true);
+  }else{
+    console.log('Please choose a package name. This is the name of the .html file of the package. Example:');
+    console.log('\tgulp packas --{name-of-your-html-file} \n');
+  }
+});
+//gulp task to package a project into a compiled .html file (save)
 gulp.task('pack', function(){
   //if package name provided
   var newPackName=getYargKey(argv);
+  if(newPackName==undefined){
+    //if a current dist/index.html file is already there (current unpacked project)
+    if(fs.existsSync('./dist/index.html')){
+      //get the html of the current unpacked project (this one)
+      var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
+      //get the project json of this project
+      var thisProjJson=getProjectFilesJson(thisHtml);
+      if(thisProjJson!=undefined){
+        //if this project is named
+        if(thisProjJson.hasOwnProperty('name')){
+          //just use the name of the CURRENT package
+          newPackName=thisProjJson.name;
+          console.log('current package, "'+newPackName+'"');
+        }
+      }
+    }
+  }
+  //if there is a package name to pack
   if(newPackName!=undefined){
     //do pack
     gulpPack(newPackName);
   }else{
     console.log('Please choose a package name. This is the name of the .html file of the package. Example:');
     console.log('\tgulp pack --{name-of-your-html-file} \n');
+  }
+});
+gulp.task('packstat', function(){
+  var hasStat=false;
+  //if package name provided
+  var packName=getYargKey(argv);
+  if(packName==undefined){
+    //if a current dist/index.html file is already there (current unpacked project)
+    if(fs.existsSync('./dist/index.html')){
+      //get the html of the current unpacked project (this one)
+      var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
+      //get the project json of this project
+      var thisProjJson=getProjectFilesJson(thisHtml);
+      if(thisProjJson!=undefined){
+        console.log('Current package: ');
+        hasStat=true;
+        for(key in thisProjJson){
+          if(thisProjJson.hasOwnProperty(key)){
+            console.log(key+' --> '+thisProjJson[key]);
+          }
+        }
+      }
+    }
+  }
+  if(!hasStat){
+    console.log('No package is open.');
+    console.log('gulp pack');
+    console.log('gulp pack --{name-of-your-html-file}');
+    console.log('...to update/create package. If no --html-file name is provided, just update the CURRENT package');
   }
 });
 //pass the name of an html file, this task will read the project files and
@@ -553,6 +620,17 @@ gulp.task('unpack', function(){
     console.log('\nYou must indicate which project you want to unpack. Example: ');
     console.log('gulp unpack --{name-of-your-html-file}\n');
   }
+});
+gulp.task('help', function(){
+  console.log('Create a new package for the current index.html file and resources (like save-as):');
+  console.log('\tgulp packas --{name-of-your-html-file}');
+  console.log('Create, update or rename package (like save):');
+  console.log('\tgulp pack --{rename-your-html-file}');
+  console.log('\tgulp pack');
+  console.log('Sitch to a different package to unpack and work on');
+  console.log('\tgulp unpack --{name-of-your-html-file}');
+  console.log('Check which package is currently unpacked:');
+  console.log('\tgulp packstat');
 });
 //the default action will open a browser window for the index.html file
 gulp.task('default', ['serve']);
