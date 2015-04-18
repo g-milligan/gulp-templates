@@ -1,3 +1,7 @@
 .DS_Store
-dist
+dist/index.html
+css
+glsl
+js
+template
 node_modules

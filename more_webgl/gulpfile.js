@@ -22,11 +22,30 @@ var gulpif = require('gulp-if');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
-var htmlStr, htmlChangeTrigger, projectFiles;
+var htmlStr, htmlChangeTrigger, projectFiles, setNewProjName;
 var htmlReloadTasks=['start', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
+var htmlReloadFunctions={};
 
 var startProjFiles='\n <!-- [@project] \n';
 var endProjFiles='\n [/@project] --> \n';
+//get the json key arg name input in the terminal like "gulp {task} --{arg}"
+var getYargKey=function(argv,defaultVal){
+  var ret;
+  //try to get the file name from argv
+  for(var key in argv){
+    if(argv.hasOwnProperty(key)){
+      if(key.length>0&&key.indexOf('$')!==0&&key.indexOf('_')!==0){
+        //use this param name as the fileName
+        ret=key;
+        break;
+      }
+    }
+  }
+  if(ret==undefined){
+    ret=defaultVal;
+  }
+  return ret;
+};
 //load the html string that will modified by having external file content combined-inserted into it
 var loadHtmlStr=function(loadTrigger){
   //if the html isn't loaded yet
@@ -59,51 +78,26 @@ var loadHtmlStr=function(loadTrigger){
     projectFiles=[];
   }
 };
+//get the project files from an html string, return string object
+var getProjectFilesStr=function(html){
+  var jsonStr;
+  if(html.lastIndexOf(startProjFiles)!==-1){
+    if(html.lastIndexOf(endProjFiles)!==-1){
+      jsonStr=html.substring(html.lastIndexOf(startProjFiles)+startProjFiles.length);
+      jsonStr=jsonStr.substring(0,jsonStr.lastIndexOf(endProjFiles));
+      jsonStr=jsonStr.trim();
+    }
+  }
+  return jsonStr;
+};
 //get the project files from an html string, return json object
 var getProjectFilesJson=function(html){
   var json;
-  if(html.lastIndexOf(startProjFiles)!==-1){
-    if(html.lastIndexOf(endProjFiles)!==-1){
-      var jsonStr=html.substring(html.lastIndexOf(startProjFiles)+startProjFiles.length);
-      jsonStr=jsonStr.substring(0,jsonStr.lastIndexOf(endProjFiles));
-      jsonStr=jsonStr.trim();
-      json=JSON.parse(jsonStr);
-    }
+  var jsonStr=getProjectFilesStr(html);
+  if(jsonStr!=undefined){
+    json=JSON.parse(jsonStr);
   }
   return json;
-};
-//insert a list of project files that can be used to "unpack" the separate files from the single distribution .html file
-var insertProjectFilesList=function(html,filesList){
-  var ret={newHtml:'',projectListStr:''};
-  var closeBody='</body>'; var projListStr='';
-  //if there is a closing body tag in there
-  if(html.indexOf(closeBody)!==-1){
-    //remove the project files from the htmlStr
-    if(html.lastIndexOf(startProjFiles)!==-1){
-      if(html.lastIndexOf(endProjFiles)!==-1){
-        var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
-        var afterProjFiles=html.substring(html.lastIndexOf(endProjFiles)+endProjFiles.length);
-        html=beforeProjFiles+afterProjFiles;
-      }
-    }
-    //if there are any project files
-    if(filesList!=undefined&&filesList.length>0){
-      //for each project file
-      for(var p=0;p<filesList.length;p++){
-        var file=filesList[p];
-        if(p!==0){projListStr+=', ';}
-        if(file.indexOf('./')===0){file=file.substring('./'.length);}
-        projListStr+='"'+file+'"';
-      }
-      //insert the project files list string before the closing body tag
-      var beforeClose=html.substring(0,html.lastIndexOf(closeBody));
-      var atClose=html.substring(html.lastIndexOf(closeBody));
-      html=beforeClose+startProjFiles+'{"files":['+projListStr+']}'+endProjFiles+atClose;
-    }
-  }
-  ret.newHtml=html;
-  ret.projectListStr=projListStr;
-  return ret;
 };
 //when the htmlStr has all of the updated file content inserted, write this changed string into the file
 var writeHtmlStr=function(callTrigger){
@@ -169,6 +163,64 @@ var getSplitContent=function(html,fname){
   }
   return returnParts;
 };
+//insert a list of project files that can be used to "unpack" the separate files from the single distribution .html file
+var insertProjectFilesList=function(html,filesList){
+  var ret={newHtml:'',projectListStr:''};
+  var closeBody='</body>'; var projListStr='';
+  //if there is a closing body tag in there
+  if(html.indexOf(closeBody)!==-1){
+    //remove the project files from the htmlStr
+    if(html.lastIndexOf(startProjFiles)!==-1){
+      if(html.lastIndexOf(endProjFiles)!==-1){
+        //remove the project files from the htmlStr
+        var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
+        var afterProjFiles=html.substring(html.lastIndexOf(endProjFiles)+endProjFiles.length);
+        html=beforeProjFiles+afterProjFiles;
+      }
+    }
+    //if there are any project files
+    if(filesList!=undefined&&filesList.length>0){
+      //for each project file
+      for(var p=0;p<filesList.length;p++){
+        var file=filesList[p];
+        if(p!==0){projListStr+=', ';}
+        if(file.indexOf('./')===0){file=file.substring('./'.length);}
+        projListStr+='"'+file+'"';
+      }
+      //get the project properties from the existing index.html file, if one exists
+      var prevProjJson;
+      if(fs.existsSync('./dist/index.html')){
+        //get the html of the current unpacked project (this one)
+        var indexHtml=fs.readFileSync('./dist/index.html', 'utf8');
+        prevProjJson=getProjectFilesJson(indexHtml);
+      }
+      //restore project properties, like project name
+      var projName=''; var retProjName='';
+      if(prevProjJson!=undefined){
+        //if there was already a project name, restore the project name
+        if(prevProjJson.hasOwnProperty('name')){
+          retProjName=prevProjJson.name;
+          projName='"name":"'+retProjName+'", ';
+        }
+      }
+      //overwrite project properties, like project name
+      if(setNewProjName!=undefined){
+        //set new project name
+        retProjName=setNewProjName;
+        setNewProjName=undefined;
+        projName='"name":"'+retProjName+'", ';
+      }
+      //insert the project files list string before the closing body tag
+      var beforeClose=html.substring(0,html.lastIndexOf(closeBody));
+      var atClose=html.substring(html.lastIndexOf(closeBody));
+      html=beforeClose+startProjFiles+'{'+projName+'"files":['+projListStr+']}'+endProjFiles+atClose;
+    }
+  }
+  ret.newHtml=html;
+  ret.projectListStr=projListStr;
+  ret.projectName=retProjName;
+  return ret;
+};
 //insert the external file content into the html depending on the location of placement tokens
 var insertIntoHtml=function(html,path,allowedExt){
   //for each file in the target directory
@@ -211,30 +263,50 @@ var insertIntoHtml=function(html,path,allowedExt){
   }
   return html;
 };
-gulp.task('start', function(){
+//start
+htmlReloadFunctions['start']=function(){
   //set the final task that will trigger the insert html write finisher
   htmlChangeTrigger=htmlReloadTasks[htmlReloadTasks.length-1];
   loadHtmlStr('start');
+};
+gulp.task('start', function(){
+  htmlReloadFunctions['start']();
 });
-gulp.task('compile-css', function() {
+//compile-css
+htmlReloadFunctions['compile-css']=function(){
   loadHtmlStr('compile-css');
   htmlStr=insertIntoHtml(htmlStr, './css/', ['.css']);
   writeHtmlStr('compile-css');
+};
+gulp.task('compile-css', function() {
+  htmlReloadFunctions['compile-css']();
 });
-gulp.task('compile-js', function() {
+//compile-js
+htmlReloadFunctions['compile-js']=function(){
   loadHtmlStr('compile-js');
   htmlStr=insertIntoHtml(htmlStr, './js/', ['.js']);
   writeHtmlStr('compile-js');
+};
+gulp.task('compile-js', function() {
+  htmlReloadFunctions['compile-js']();
 });
-gulp.task('compile-vertex-shaders', function() {
+//compile-vertex-shaders
+htmlReloadFunctions['compile-vertex-shaders']=function(){
   loadHtmlStr('compile-vertex-shaders');
   htmlStr=insertIntoHtml(htmlStr, './glsl/', ['.vert']);
   writeHtmlStr('compile-vertex-shaders');
+};
+gulp.task('compile-vertex-shaders', function() {
+  htmlReloadFunctions['compile-vertex-shaders']();
 });
-gulp.task('compile-fragment-shaders', function() {
+//compile-fragment-shaders
+htmlReloadFunctions['compile-fragment-shaders']=function(){
   loadHtmlStr('compile-fragment-shaders');
   htmlStr=insertIntoHtml(htmlStr, './glsl/', ['.frag']);
   writeHtmlStr('compile-fragment-shaders');
+};
+gulp.task('compile-fragment-shaders', function() {
+  htmlReloadFunctions['compile-fragment-shaders']();
 });
 //page reload triggers
 gulp.task('html-reload', htmlReloadTasks);
@@ -242,65 +314,197 @@ gulp.task('css-reload', ['compile-css']);
 gulp.task('js-reload', ['compile-js']);
 gulp.task('vertex-shader-reload', ['compile-vertex-shaders']);
 gulp.task('fragment-shader-reload', ['compile-fragment-shaders']);
+var gulpServe=function(){
+  //serve files from the root of this project distribution
+  browserSync({
+      server: {
+          baseDir: "dist"
+      }
+  });
+  //AUTO RELOAD: while the server runs...
+  gulp.watch("js/*.js", ['js-reload']);
+  gulp.watch("glsl/*.vert", ['vertex-shader-reload']);
+  gulp.watch("glsl/*.frag", ['fragment-shader-reload']);
+  gulp.watch("template.html", ['html-reload']);
+  gulp.watch("css/*.css", ['css-reload']);
+};
 //server task
 gulp.task('serve', htmlReloadTasks, function() {
-    //serve files from the root of this project distribution
-    browserSync({
-        server: {
-            baseDir: "dist"
+  gulpServe();
+});
+//updates/compiles current index.html packages then renames the index.html to a new package name
+var gulpPack=function(newPackName){
+  //if there is a package name given
+  if(newPackName!=undefined){
+    //if the package name is not index
+    if(newPackName!=='index'){
+      console.log('packing current project...');
+      //if a current dist/index.html file is already there (current unpacked project)
+      if(fs.existsSync('./dist/index.html')){
+        //get the html of the current unpacked project (this one)
+        var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
+        //get the project json of this project
+        var thisProjJson=getProjectFilesJson(thisHtml);
+        if(thisProjJson!=undefined){
+          //if this project is named
+          if(thisProjJson.hasOwnProperty('name')){
+            //if this newPackName is different from the previous, thisProjJson.name (if renaming package)
+            if(thisProjJson.name!==newPackName){
+              //if this previous package name exists
+              if(fs.existsSync('./dist/'+thisProjJson.name+'.html')){
+                //delete previous package file
+                console.log('DISCARD PACKAGE NAME --> '+thisProjJson.name+'.html');
+                fs.unlinkSync('./dist/'+thisProjJson.name+'.html');
+              }
+            }
+          }
         }
-    });
-    //AUTO RELOAD: while the server runs...
-    gulp.watch("js/*.js", ['js-reload']);
-    gulp.watch("glsl/*.vert", ['vertex-shader-reload']);
-    gulp.watch("glsl/*.frag", ['fragment-shader-reload']);
-    gulp.watch("template.html", ['html-reload']);
-    gulp.watch("css/*.css", ['css-reload']);
+      }
+      //set the package name (written into the .html file)
+      setNewProjName=newPackName;
+      //for each compile task
+      for(var c=0;c<htmlReloadTasks.length;c++){
+        var taskName=htmlReloadTasks[c];
+        console.log('[pack-task] '+taskName);
+        //run compile task
+        htmlReloadFunctions[taskName]();
+      }
+      //if this package name already exists
+      if(fs.existsSync('./dist/'+newPackName+'.html')){
+        //delete the package so it can be recreated
+        fs.unlinkSync('./dist/'+newPackName+'.html');
+      }
+      //get the the html from recompiled index.html file
+      var compiledHtml=fs.readFileSync('./dist/index.html', 'utf8');
+      //now write out the package (copy of index.html)
+      fs.writeFileSync('./dist/'+newPackName+'.html', compiledHtml);
+      console.log('PACKAGE CREATED --> '+newPackName+'.html');
+    }else{
+      console.log('"'+newPackName+'" is reserved for the current unpacked project. Please choose a different package name.');
+    }
+  }else{
+    console.log('Please choose a package name. This is the name of the .html file of the package. Example:');
+    console.log('\tgulp pack --{name-of-your-html-file} \n');
+  }
+};
+//gulp task to package a project into a compiled .html file
+gulp.task('pack', function(){
+  //if package name provided
+  var newPackName=getYargKey(argv);
+  if(newPackName!=undefined){
+    //do pack
+    gulpPack(newPackName);
+  }else{
+    console.log('Please choose a package name. This is the name of the .html file of the package. Example:');
+    console.log('\tgulp pack --{name-of-your-html-file} \n');
+  }
 });
 //pass the name of an html file, this task will read the project files and
 //try to separate out the project files into different "unpacked" files
 gulp.task('unpack', function(){
-  var fileName='index';
-  //try to get the file name from argv
-  for(var key in argv){
-    if(argv.hasOwnProperty(key)){
-      if(key.length>0&&key.indexOf('$')!==0&&key.indexOf('_')!==0){
-        //use this param name as the fileName
-        fileName=key;
-        break;
+  var saveThisFirst=false; var alreadyUnpacked=false;
+  //get the name of the project to unpack
+  var fileName=getYargKey(argv);
+  //if a package name was given
+  if(fileName!=undefined){
+    //if the package name is not index
+    if(fileName!=='index'){
+      //if a current dist/index.html file is already there (current unpacked project)
+      if(fs.existsSync('./dist/index.html')){
+        //flag: pack current project BEFORE unpacking another
+        saveThisFirst=true;
+        //get the html of the current unpacked project (this one)
+        var thisHtml=fs.readFileSync('./dist/index.html', 'utf8');
+        //get the project json of this project
+        var thisProjJson=getProjectFilesJson(thisHtml);
+        if(thisProjJson!=undefined){
+          //if this project is named
+          if(thisProjJson.hasOwnProperty('name')){
+            //compile/pack this current project into an updated {name}.html file...
+            gulpPack(thisProjJson.name);
+            //current project packed already; safe to unpack a different project now
+            saveThisFirst=false;
+            //if NOT trying to unpack the already unpacked project
+            if(thisProjJson.name!==fileName){
+              //get the (possibly) updated project files list from {name}.html
+              thisHtml=fs.readFileSync('./dist/'+thisProjJson.name+'.html', 'utf8');
+              thisProjJson=getProjectFilesJson(thisHtml);
+              //for each file, from this packaged project
+              for(var p=0;p<thisProjJson.files.length;p++){
+                var ppath=thisProjJson.files[p];
+                if(ppath.indexOf('.')===0){
+                  ppath=ppath.substring(1);
+                }
+                if(ppath.indexOf('/')===0){
+                  ppath=ppath.substring(1);
+                }
+                //remove this file so that the new package files can replace this previous package's files
+                fs.unlinkSync('./'+ppath);
+              }
+            }else{
+              alreadyUnpacked=true;
+            }
+          }
+        }
       }
-    }
-  }
-  var path='./dist/'+fileName+'.html';
-  if (fs.existsSync(path)){
-    //if the project files json could be found in this html
-    var html=fs.readFileSync(path, 'utf8');
-    var projJson=getProjectFilesJson(html);
-    if(projJson!=undefined){
-      //for each project file
-      for(var f=0;f<projJson.files.length;f++){
-        //get the file path
-        var fpath=projJson.files[f];
-        //get just the file name
-        var fname=fpath;
-        if(fname.lastIndexOf('/')!==0){
-          fname=fname.substring(fname.lastIndexOf('/')+'/'.length);
-        }
-        //get the file content, embedded as part of the html
-        var contentParts=getSplitContent(html,fname);
-        //if this file has embedded content
-        if(contentParts!=undefined){
-          console.log('[unpack] '+fpath);
-          //***
+      //if the current project is not already packed (needs save-as before unpacking a new project)
+      if(!saveThisFirst){
+        //if this project is NOT already unpacked
+        if(!alreadyUnpacked){
+          //if the package to unpack exists
+          var path='./dist/'+fileName+'.html';
+          if (fs.existsSync(path)){
+            //if the project files json could be found in this html
+            var html=fs.readFileSync(path, 'utf8');
+            var projJson=getProjectFilesJson(html);
+            if(projJson!=undefined){
+              //if there are any project files
+              if(projJson.files.length>0){
+                //for each project file
+                for(var f=0;f<projJson.files.length;f++){
+                  //get the file path
+                  var fpath=projJson.files[f];
+                  //get just the file name
+                  var fname=fpath;
+                  if(fname.lastIndexOf('/')!==0){
+                    fname=fname.substring(fname.lastIndexOf('/')+'/'.length);
+                  }
+                  //get the file content, embedded as part of the html
+                  var contentParts=getSplitContent(html,fname);
+                  //if this file has embedded content
+                  if(contentParts!=undefined){
+                    console.log('[unpack] '+fpath);
+                    //*** create this project file (unpack it)
+                  }else{
+                    console.log('\n"'+fpath+'" is named within the project files, but doesn\'t appear within the '+fileName+'.html\n');
+                  }
+                }
+                //copy the {package}.html to dist/index.html and create the template.html file from {package}.html
+                //***
+                //open the unpacked project into a browser
+                gulpServe();
+              }
+            }else{
+              console.log('\nProject tags not found in '+path+': '+startProjFiles.trim()+' ... '+endProjFiles.trim()+'\n');
+            }
+          }else{
+            console.log('\nDoesn\'t exist: "'+path+'"\n');
+          }
         }else{
-          console.log('"'+fpath+'" is named within the project files, but doesn\'t appear within the '+fileName+'.html');
+          console.log('\n"'+fileName+'" is already unpacked.\n');
         }
+      }else{
+        //current file not saved/packed... must pack this before unpacking another...
+        console.log('\nYour current project is not saved/packed. Please pack BEFORE unpacking a different project: \n');
+        console.log('\tgulp pack --{name-of-your-html-file} \n');
+        console.log('Give your current project a UNIQUE name, other than "index". It will be packaged into a single .html file. \n');
       }
     }else{
-      console.log('Project tags not found in '+path+': '+startProjFiles.trim()+' ... '+endProjFiles.trim());
+      console.log('"'+fileName+'" is an invalid package name since it is reserved for the CURRENT unpacked project.');
     }
   }else{
-    console.log('Doesn\'t exist: "'+path+'"');
+    console.log('\nYou must indicate which project you want to unpack. Example: ');
+    console.log('gulp unpack --{name-of-your-html-file}\n');
   }
 });
 //the default action will open a browser window for the index.html file
