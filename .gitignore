@@ -1,1 +1,7 @@
 .DS_Store
+.bck
+css
+glsl
+js
+template.html
+node_modules
