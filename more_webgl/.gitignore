@@ -1,7 +1,4 @@
 .DS_Store
-dist/index.html
-css
-glsl
-js
-template
+.bck
+
 node_modules
