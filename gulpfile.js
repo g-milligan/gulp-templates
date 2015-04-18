@@ -26,8 +26,8 @@ var htmlStr, htmlChangeTrigger, projectFiles, setNewProjName;
 var htmlReloadTasks=['start', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
 var htmlReloadFunctions={};
 
-var startProjFiles='\n <!-- [@project] \n';
-var endProjFiles='\n [/@project] --> \n';
+var startProjFiles='<!-- [@project]';
+var endProjFiles='[/@project] -->';
 //get the json key arg name input in the terminal like "gulp {task} --{arg}"
 var getYargKey=function(argv,defaultVal){
   var ret;
@@ -163,21 +163,27 @@ var getSplitContent=function(html,fname){
   }
   return returnParts;
 };
+//remove <!-- [@project] ... [/@project] --> from the html string
+var removeProjectFilesJson=function(html){
+  //remove the project files from the htmlStr
+  if(html.lastIndexOf(startProjFiles)!==-1){
+    if(html.lastIndexOf(endProjFiles)!==-1){
+      //remove the project files from the htmlStr
+      var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
+      var afterProjFiles=html.substring(html.lastIndexOf(endProjFiles)+endProjFiles.length);
+      html=beforeProjFiles+afterProjFiles;
+    }
+  }
+  return html;
+};
 //insert a list of project files that can be used to "unpack" the separate files from the single distribution .html file
 var insertProjectFilesList=function(html,filesList){
   var ret={newHtml:'',projectListStr:''};
   var closeBody='</body>'; var projListStr='';
   //if there is a closing body tag in there
   if(html.indexOf(closeBody)!==-1){
-    //remove the project files from the htmlStr
-    if(html.lastIndexOf(startProjFiles)!==-1){
-      if(html.lastIndexOf(endProjFiles)!==-1){
-        //remove the project files from the htmlStr
-        var beforeProjFiles=html.substring(0,html.lastIndexOf(startProjFiles));
-        var afterProjFiles=html.substring(html.lastIndexOf(endProjFiles)+endProjFiles.length);
-        html=beforeProjFiles+afterProjFiles;
-      }
-    }
+    //remove <!-- [@project] ... [/@project] --> from the html string
+    html=removeProjectFilesJson(html);
     //if there are any project files
     if(filesList!=undefined&&filesList.length>0){
       //for each project file
@@ -402,7 +408,7 @@ gulp.task('pack', function(){
 //pass the name of an html file, this task will read the project files and
 //try to separate out the project files into different "unpacked" files
 gulp.task('unpack', function(){
-  var saveThisFirst=false; var alreadyUnpacked=false;
+  var saveThisFirst=false; var alreadyUnpacked=false; var clearProjJson;
   //get the name of the project to unpack
   var fileName=getYargKey(argv);
   //if a package name was given
@@ -428,19 +434,7 @@ gulp.task('unpack', function(){
             if(thisProjJson.name!==fileName){
               //get the (possibly) updated project files list from {name}.html
               thisHtml=fs.readFileSync('./dist/'+thisProjJson.name+'.html', 'utf8');
-              thisProjJson=getProjectFilesJson(thisHtml);
-              //for each file, from this packaged project
-              for(var p=0;p<thisProjJson.files.length;p++){
-                var ppath=thisProjJson.files[p];
-                if(ppath.indexOf('.')===0){
-                  ppath=ppath.substring(1);
-                }
-                if(ppath.indexOf('/')===0){
-                  ppath=ppath.substring(1);
-                }
-                //remove this file so that the new package files can replace this previous package's files
-                fs.unlinkSync('./'+ppath);
-              }
+              clearProjJson=getProjectFilesJson(thisHtml);
             }else{
               alreadyUnpacked=true;
             }
@@ -460,6 +454,26 @@ gulp.task('unpack', function(){
             if(projJson!=undefined){
               //if there are any project files
               if(projJson.files.length>0){
+                //if there are existing package files that should be cleared before the new package files are unpacked
+                if(clearProjJson!=undefined){
+                  //for each file, from this packaged project
+                  for(var p=0;p<clearProjJson.files.length;p++){
+                    var ppath=clearProjJson.files[p];
+                    if(ppath.indexOf('.')===0){
+                      ppath=ppath.substring(1);
+                    }
+                    if(ppath.indexOf('/')===0){
+                      ppath=ppath.substring(1);
+                    }
+                    //if this file exists
+                    if(fs.existsSync('./'+ppath)){
+                      //remove this file so that the new package files can replace this previous package's files
+                      fs.unlinkSync('./'+ppath);
+                    }
+                  }
+                }
+                //init the new template.html
+                var newTemplateHtml=html;
                 //for each project file
                 for(var f=0;f<projJson.files.length;f++){
                   //get the file path
@@ -474,13 +488,46 @@ gulp.task('unpack', function(){
                   //if this file has embedded content
                   if(contentParts!=undefined){
                     console.log('[unpack] '+fpath);
-                    //*** create this project file (unpack it)
+                    if(fpath.indexOf('.')===0){
+                      fpath=fpath.substring(1);
+                    }
+                    if(fpath.indexOf('/')===0){
+                      fpath=fpath.substring(1);
+                    }
+                    //if a file with this name already exists
+                    if(fs.existsSync('./'+fpath)){
+                      //delete this file
+                      fs.unlinkSync('./'+fpath);
+                    }
+                    //create this project file (unpack it)
+                    fs.writeFileSync('./'+fpath, contentParts[1]);
+                    //remove the embeded content from the template.html string
+                    var templateParts=getSplitContent(newTemplateHtml,fname);
+                    if(templateParts!=undefined){
+                      //remove this file content from the new template.html
+                      newTemplateHtml=templateParts[0]+templateParts[2];
+                    }
                   }else{
                     console.log('\n"'+fpath+'" is named within the project files, but doesn\'t appear within the '+fileName+'.html\n');
                   }
                 }
-                //copy the {package}.html to dist/index.html and create the template.html file from {package}.html
-                //***
+                //copy the {package}.html to dist/index.html
+                //if dist/index.html already exists
+                if(fs.existsSync('./dist/index.html')){
+                  //delete this file
+                  fs.unlinkSync('./dist/index.html');
+                }
+                //copy the {package}.html to dist/index.html
+                fs.writeFileSync('./dist/index.html', html);
+                //remove <!-- [@project] ... [/@project] --> from newTemplateHtml
+                newTemplateHtml=removeProjectFilesJson(newTemplateHtml);
+                //if template.html already exists
+                if(fs.existsSync('template.html')){
+                  //delete this file
+                  fs.unlinkSync('template.html');
+                }
+                //copy the {package}.html to dist/index.html
+                fs.writeFileSync('template.html', newTemplateHtml);
                 //open the unpacked project into a browser
                 gulpServe();
               }
