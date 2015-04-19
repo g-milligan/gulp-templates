@@ -1,0 +1,64 @@
+Vertex
+  A point defined in 3 dimensional space. Values are used to
+  describe this point. For example, (x,y,z) is used to determine "left", "top",
+  "zoom" of one point in 3D space. A matrix can be (x,y,z,x,y,z,x,y,z) to
+  determine a shape with three points, or vertices.
+Matrix
+  A series of numbers, which describe coordinates of points in three dimensional
+  space. For example, (x,y,z,x,y,z,x,y,z).
+Model View Matrix
+  This is a special matrix, which describes the structure of an object
+  regardless of WHERE that object is in 3D space. This matrix always remains
+  constant, UNLESS the shape of the object changes. But if the object moves,
+  this matrix will retain its values (the shape of the object).
+Projection Matrix
+  A matrix that describes the perspective and location of an object. For
+  example, if a cube is rotating, then perspective will skew the shape that is
+  drawn on the screen. The projection matrix is applied to the model view
+  matrix to determine how to SKEW the original model view matrix.
+GPU
+  Graphics Processing Unit. This is the part of the computer that is performing
+  calculations and creating the graphical components.
+Shader
+  A part of the code, written in low-level GLSL language. The GLSL language
+  is low-level in that it happens on the Graphics Processing Unit (GPU) instead
+  of other processing units that handle other computational processes.
+  Because of this division of labor, a shader can build complex 3D
+  animations without slowing down other processes that happen at the same time.
+Vertex Shader
+  A part of the code, written in low-level GLSL language, responsible for
+  defining points in three dimensional space. Simply define these points to
+  create three dimensional objects. Vertex shader code is executed every time
+  a point must be drawn, in three dimensional space, in order to determine
+  WHERE that point is drawn.
+Fragment Shader
+  A part of the code, written in low-level GLSL language, responsible for
+  'filling in' pixels with colors/textures. Any pixel that is NOT at a vertex
+  must be given a color or texture. This type of 'filling in' is also called
+  interpolation. Similar to how a vertex shader runs for every vertex, a
+  fragment shader runs for every pixel.
+Interpolation
+  The process of coloring or texturizing points BETWEEN vertices, defined
+  by the vertex shader. A fragment shader interpolates pixels by giving each
+  one, between vertices, a color or texture, as defined by the fragment shader
+  code.
+Linear interpolation
+  A fancy way of saying, 'filling in' a 3D shape. For example, if a pixel
+  is shaded as RED, and two pixels to the right are shaded as blue, then
+  LINEAR INTERPOLATION automatically shades the pixels (between red and blue)
+  as a gradual approximation; from red, transition to purple, to blue.
+  Even though you do not explicitly shade them with purple, the linear
+  interpolation does that for you. In other words, it 'fills in' the in-between
+  colors.
+Program
+  Combining a vertex with a fragment shader creates a code object called a
+  program. A program can help draw fleshed out 3D shapes because it includes
+  a vertex shader, which defines the shape and perspective; and
+  a fragment shader, which defines the color and texture. Together, fragment
+  and vertex shader code make a program.
+Buffer
+  One 'slide' image out of many possible 'slides'. You draw an image onto a
+  buffer, saved in memory. A buffer holds the image results of the code that
+  generated the image, in memory.
+Frame Buffer
+  A special type of buffer; the current buffer that's visible on screen.

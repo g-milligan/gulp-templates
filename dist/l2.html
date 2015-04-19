@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>WebGL | Movement, Matrix Stack</title>
+<title>WebGL | Color, Linear Interpolation</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -39,185 +39,6 @@ quat4.multiplyVec3=function(a,b,c){c||(c=b);var d=b[0],e=b[1],g=b[2];b=a[0];var 
 quat4.toMat4=function(a,b){b||(b=mat4.create());var c=a[0],d=a[1],e=a[2],g=a[3],f=c+c,h=d+d,i=e+e,j=c*f,k=c*h;c=c*i;var l=d*h;d=d*i;e=e*i;f=g*f;h=g*h;g=g*i;b[0]=1-(l+e);b[1]=k-g;b[2]=c+h;b[3]=0;b[4]=k+g;b[5]=1-(j+e);b[6]=d-f;b[7]=0;b[8]=c-h;b[9]=d+f;b[10]=1-(j+l);b[11]=0;b[12]=0;b[13]=0;b[14]=0;b[15]=1;return b};quat4.slerp=function(a,b,c,d){d||(d=a);var e=c;if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]<0)e=-1*c;d[0]=1-c*a[0]+e*b[0];d[1]=1-c*a[1]+e*b[1];d[2]=1-c*a[2]+e*b[2];d[3]=1-c*a[3]+e*b[3];return d};
 quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 // [/glMatrix-0.9.5.min.js]
-</script>
-
-<script name="webgl-utils.js" type="text/javascript">
-// [webgl-utils.js]
-/*
- * Copyright 2010, Google Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *     * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-
-/**
- * @fileoverview This file contains functions every webgl program will need
- * a version of one way or another.
- *
- * Instead of setting up a context manually it is recommended to
- * use. This will check for success or failure. On failure it
- * will attempt to present an approriate message to the user.
- *
- *       gl = WebGLUtils.setupWebGL(canvas);
- *
- * For animated WebGL apps use of setTimeout or setInterval are
- * discouraged. It is recommended you structure your rendering
- * loop like this.
- *
- *       function render() {
- *         window.requestAnimFrame(render, canvas);
- *
- *         // do rendering
- *         ...
- *       }
- *       render();
- *
- * This will call your rendering function up to the refresh rate
- * of your display but will stop rendering if your app is not
- * visible.
- */
-
-WebGLUtils = function() {
-
-/**
- * Creates the HTLM for a failure message
- * @param {string} canvasContainerId id of container of th
- *        canvas.
- * @return {string} The html.
- */
-var makeFailHTML = function(msg) {
-  return '' +
-    '<table style="background-color: #8CE; width: 100%; height: 100%;"><tr>' +
-    '<td align="center">' +
-    '<div style="display: table-cell; vertical-align: middle;">' +
-    '<div style="">' + msg + '</div>' +
-    '</div>' +
-    '</td></tr></table>';
-};
-
-/**
- * Mesasge for getting a webgl browser
- * @type {string}
- */
-var GET_A_WEBGL_BROWSER = '' +
-  'This page requires a browser that supports WebGL.<br/>' +
-  '<a href="http://get.webgl.org">Click here to upgrade your browser.</a>';
-
-/**
- * Mesasge for need better hardware
- * @type {string}
- */
-var OTHER_PROBLEM = '' +
-  "It doesn't appear your computer can support WebGL.<br/>" +
-  '<a href="http://get.webgl.org/troubleshooting/">Click here for more information.</a>';
-
-/**
- * Creates a webgl context. If creation fails it will
- * change the contents of the container of the <canvas>
- * tag to an error message with the correct links for WebGL.
- * @param {Element} canvas. The canvas element to create a
- *     context from.
- * @param {WebGLContextCreationAttirbutes} opt_attribs Any
- *     creation attributes you want to pass in.
- * @param {function:(msg)} opt_onError An function to call
- *     if there is an error during creation.
- * @return {WebGLRenderingContext} The created context.
- */
-var setupWebGL = function(canvas, opt_attribs, opt_onError) {
-  function handleCreationError(msg) {
-    var container = canvas.parentNode;
-    if (container) {
-      var str = window.WebGLRenderingContext ?
-           OTHER_PROBLEM :
-           GET_A_WEBGL_BROWSER;
-      if (msg) {
-        str += "<br/><br/>Status: " + msg;
-      }
-      container.innerHTML = makeFailHTML(str);
-    }
-  };
-
-  opt_onError = opt_onError || handleCreationError;
-
-  if (canvas.addEventListener) {
-    canvas.addEventListener("webglcontextcreationerror", function(event) {
-          opt_onError(event.statusMessage);
-        }, false);
-  }
-  var context = create3DContext(canvas, opt_attribs);
-  if (!context) {
-    if (!window.WebGLRenderingContext) {
-      opt_onError("");
-    }
-  }
-  return context;
-};
-
-/**
- * Creates a webgl context.
- * @param {!Canvas} canvas The canvas tag to get context
- *     from. If one is not passed in one will be created.
- * @return {!WebGLContext} The created context.
- */
-var create3DContext = function(canvas, opt_attribs) {
-  var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
-  var context = null;
-  for (var ii = 0; ii < names.length; ++ii) {
-    try {
-      context = canvas.getContext(names[ii], opt_attribs);
-    } catch(e) {}
-    if (context) {
-      break;
-    }
-  }
-  return context;
-}
-
-return {
-  create3DContext: create3DContext,
-  setupWebGL: setupWebGL
-};
-}();
-
-/**
- * Provides requestAnimationFrame in a cross browser way.
- */
-window.requestAnimFrame = (function() {
-  return window.requestAnimationFrame ||
-         window.webkitRequestAnimationFrame ||
-         window.mozRequestAnimationFrame ||
-         window.oRequestAnimationFrame ||
-         window.msRequestAnimationFrame ||
-         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-           window.setTimeout(callback, 1000/60);
-         };
-})();
-// [/webgl-utils.js]
 </script>
 
 </head>
@@ -344,31 +165,11 @@ function initShaders() {
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
 var mvMatrix = mat4.create();
-var mvMatrixStack = [];
 var pMatrix = mat4.create();
-
-function mvPushMatrix() {
-  var copy = mat4.create();
-  mat4.set(mvMatrix, copy);
-  mvMatrixStack.push(copy);
-}
-
-function mvPopMatrix() {
-  if (mvMatrixStack.length == 0) {
-    throw "Invalid popMatrix!";
-  }
-  mvMatrix = mvMatrixStack.pop();
-}
-
 function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
-
-function degToRad(degrees){
-  return degrees * Math.PI / 180;
-}
-
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
 var squareVertexPositionBuffer;
@@ -422,10 +223,6 @@ function initBuffers() {
     triangleVertexColorBuffer.itemSize = 4;
     triangleVertexColorBuffer.numItems = 3;
 }
-
-var rTri = 0;
-var rSquare = 0;
-
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     //get ready to draw color and depth
@@ -450,13 +247,6 @@ function drawScene() {
     -1.5 units (x=move left), 0 units (y=neither up nor down), -7 units (z=move forward)
     */
     mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-
-    /*put the current model view matrix into a stack of matrices so it can be rotated,
-    independent of the other matrices*/
-    mvPushMatrix();
-    //rotate the triangle by rTri degrees, degToRad() converts the degrees to radian units
-    mat4.rotate(mvMatrix, degToRad(rTri), [0, 1, 0]);
-
     //bind the TRIANGLE's buffer so that we can draw vertices (ARRAY_BUFFER) to the triangle
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -473,23 +263,6 @@ function drawScene() {
     draw each vertex, from the first (index=0) to the last, (index before numItems).
     Draw vertices as triangles.*/
     gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-
-    /*set aside the current model view matrix and pick up the last matrix
-    from the top of the matrices stack, so this new matrix can be transformed
-    independently from the other matrices.*/
-    mvPopMatrix();
-
-    /*put the current model view matrix into a stack of matrices so it can be rotated,
-    independent of the other matrices*/
-    mvPushMatrix();
-    /*rotate the triangle by rSquare degrees, degToRad() converts the degrees
-    to radian units. The array of numbers dictates the axis of rotation. The
-    number doesn't seem to have an impact. But if the number is NOT zero, then
-    it indicates that the shape should rotate on this axis. For example,
-    (x,y,z) if [1, 0, 0] then rotate on the X axis (as if the x axis has a pole
-    running through it)*/
-    mat4.rotate(mvMatrix, degToRad(rSquare), [1, 0, 0]);
-
     /*move square 3 units x right, 0 units y, 0 units z.
     This is relative to our previous call of translate, so when translate is called
     again, it's relative to the last position.
@@ -509,39 +282,7 @@ function drawScene() {
     In more complex cases, it can be a really useful way of specifying a complex
     surface in terms of the triangles that approximate it.*/
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
-
-    /*set aside the current model view matrix and pick up the last matrix
-    from the top of the matrices stack, so this new matrix can be transformed
-    independently from the other matrices.*/
-    mvPopMatrix();
 }
-
-var lastTime = 0;
-function animate() {
-  /*the amount by which we rotate the objects is determined by
-  how long it has been since the function was last called*/
-  var timeNow = new Date().getTime();
-  if (lastTime != 0) {
-    var elapsed = timeNow - lastTime;
-
-    rTri += (90 * elapsed) / 1000.0;
-    rSquare += (75 * elapsed) / 1000.0;
-  }
-  lastTime = timeNow;
-}
-
-function tick(){
-  //call this same function recursively
-  requestAnimFrame(tick); /*Note: requestAnimFrame is more efficient than
-            setInterval because it will stop running if a different browser tab
-            is open. Why animate and use up processing if you can't see the
-            animation? */
-  //redraw the scene
-  drawScene();
-  //animate: make changes to the degrees (orientation of the shapes)
-  animate();
-}
-
 function webGLStart() {
     var canvas = document.getElementById("canvas");
     initGL(canvas);
@@ -550,13 +291,11 @@ function webGLStart() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST); /*enable removing things that get hidden
                       behind other things to save processing*/
-
-    //start the recursive redraw of the scene on page load
-    tick();
+    drawScene();
 }
 
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l3", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/webgl-utils.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l2", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
 </html>
