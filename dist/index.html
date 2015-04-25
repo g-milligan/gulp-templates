@@ -435,7 +435,7 @@ function initTexture() {
     glassTexture = gl.createTexture();
     glassTexture.image = new Image();
     glassTexture.image.onload = function () {
-        handleLoadedTexture(glassTexture)
+        handleLoadedTexture(glassTexture);
     }
 
     glassTexture.image.src = "img/glass.gif";
