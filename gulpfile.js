@@ -15,15 +15,13 @@ note: to install additional required node plugins run command
 var fs = require('fs');
 var gutil = require('gulp-util');
 var argv = require('yargs').argv;
-var replace = require('gulp-replace');
-var rename = require('gulp-rename');
-var uglify = require('gulp-uglify');
-var gulpif = require('gulp-if');
+//var uglify = require('gulp-uglify');
+//var gulpif = require('gulp-if');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
 var htmlStr, htmlChangeTrigger, projectFiles, setNewProjName;
-var htmlReloadTasks=['start', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
+var htmlReloadTasks=['start', 'compile-html', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
 var htmlReloadFunctions={};
 
 var startProjFiles='<!-- [@project]';
@@ -278,6 +276,15 @@ htmlReloadFunctions['start']=function(){
 gulp.task('start', function(){
   htmlReloadFunctions['start']();
 });
+//compile-html
+htmlReloadFunctions['compile-html']=function(){
+  loadHtmlStr('compile-html');
+  htmlStr=insertIntoHtml(htmlStr, './html/', ['.html']);
+  writeHtmlStr('compile-html');
+};
+gulp.task('compile-html', function() {
+  htmlReloadFunctions['compile-html']();
+});
 //compile-css
 htmlReloadFunctions['compile-css']=function(){
   loadHtmlStr('compile-css');
@@ -315,7 +322,8 @@ gulp.task('compile-fragment-shaders', function() {
   htmlReloadFunctions['compile-fragment-shaders']();
 });
 //page reload triggers
-gulp.task('html-reload', htmlReloadTasks);
+gulp.task('template-reload', htmlReloadTasks);
+gulp.task('html-reload', ['compile-html']);
 gulp.task('css-reload', ['compile-css']);
 gulp.task('js-reload', ['compile-js']);
 gulp.task('vertex-shader-reload', ['compile-vertex-shaders']);
@@ -331,8 +339,9 @@ var gulpServe=function(){
   gulp.watch("js/*.js", ['js-reload']);
   gulp.watch("glsl/*.vert", ['vertex-shader-reload']);
   gulp.watch("glsl/*.frag", ['fragment-shader-reload']);
-  gulp.watch("template.html", ['html-reload']);
+  gulp.watch("template.html", ['template-reload']);
   gulp.watch("css/*.css", ['css-reload']);
+  gulp.watch("html/*.html", ['html-reload']);
 };
 //server task
 gulp.task('serve', htmlReloadTasks, function() {
