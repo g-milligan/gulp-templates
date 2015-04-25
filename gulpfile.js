@@ -21,7 +21,7 @@ var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
 var htmlStr, htmlChangeTrigger, projectFiles, setNewProjName;
-var htmlReloadTasks=['start', 'compile-html', 'compile-txt', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
+var htmlReloadTasks=['start', 'compile-html', 'compile-txt', 'compile-json', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
 var htmlReloadFunctions={};
 
 var startProjFiles='<!-- [@project]';
@@ -302,6 +302,15 @@ htmlReloadFunctions['compile-txt']=function(){
 gulp.task('compile-txt', function() {
   htmlReloadFunctions['compile-txt']();
 });
+//compile-json
+htmlReloadFunctions['compile-json']=function(){
+  loadHtmlStr('compile-json');
+  htmlStr=insertIntoHtml(htmlStr, './json/', ['.json']);
+  writeHtmlStr('compile-json');
+};
+gulp.task('compile-json', function() {
+  htmlReloadFunctions['compile-json']();
+});
 //compile-css
 htmlReloadFunctions['compile-css']=function(){
   loadHtmlStr('compile-css');
@@ -342,6 +351,7 @@ gulp.task('compile-fragment-shaders', function() {
 gulp.task('template-reload', htmlReloadTasks);
 gulp.task('html-reload', ['compile-html']);
 gulp.task('txt-reload', ['compile-txt']);
+gulp.task('json-reload', ['compile-json']);
 gulp.task('css-reload', ['compile-css']);
 gulp.task('js-reload', ['compile-js']);
 gulp.task('vertex-shader-reload', ['compile-vertex-shaders']);
@@ -361,6 +371,7 @@ var gulpServe=function(){
   gulp.watch("css/*.css", ['css-reload']);
   gulp.watch("html/*.html", ['html-reload']);
   gulp.watch("txt/*.txt", ['txt-reload']);
+  gulp.watch("json/*.json", ['json-reload']);
 };
 //server task
 gulp.task('serve', htmlReloadTasks, function() {
