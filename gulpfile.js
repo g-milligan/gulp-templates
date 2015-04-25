@@ -226,7 +226,8 @@ var insertProjectFilesList=function(html,filesList){
   return ret;
 };
 //insert the external file content into the html depending on the location of placement tokens
-var insertIntoHtml=function(html,path,allowedExt){
+var insertIntoHtml=function(html,path,allowedExt,deleteIfNotInTemplate){
+  if(deleteIfNotInTemplate==undefined){deleteIfNotInTemplate=true;}
   //for each file in the target directory
   var files = fs.readdirSync(path);
   for(var f=0;f<files.length;f++){
@@ -262,6 +263,13 @@ var insertIntoHtml=function(html,path,allowedExt){
         html=contentParts[0]+content+contentParts[2];
         //record this as one of the project files
         projectFiles.push(path+file);
+      }else{
+        //this file exists in the folder but isn't embedded in the template.html...
+
+        if(deleteIfNotInTemplate){
+          //delete this file because it isn't embedded in template.html
+          fs.unlinkSync(path+file);
+        }
       }
     }
   }
