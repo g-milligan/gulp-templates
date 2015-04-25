@@ -21,7 +21,7 @@ var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
 var htmlStr, htmlChangeTrigger, projectFiles, setNewProjName;
-var htmlReloadTasks=['start', 'compile-html', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
+var htmlReloadTasks=['start', 'compile-html', 'compile-txt', 'compile-css', 'compile-js', 'compile-vertex-shaders', 'compile-fragment-shaders'];
 var htmlReloadFunctions={};
 
 var startProjFiles='<!-- [@project]';
@@ -285,6 +285,15 @@ htmlReloadFunctions['compile-html']=function(){
 gulp.task('compile-html', function() {
   htmlReloadFunctions['compile-html']();
 });
+//compile-txt
+htmlReloadFunctions['compile-txt']=function(){
+  loadHtmlStr('compile-txt');
+  htmlStr=insertIntoHtml(htmlStr, './txt/', ['.txt']);
+  writeHtmlStr('compile-txt');
+};
+gulp.task('compile-txt', function() {
+  htmlReloadFunctions['compile-txt']();
+});
 //compile-css
 htmlReloadFunctions['compile-css']=function(){
   loadHtmlStr('compile-css');
@@ -324,6 +333,7 @@ gulp.task('compile-fragment-shaders', function() {
 //page reload triggers
 gulp.task('template-reload', htmlReloadTasks);
 gulp.task('html-reload', ['compile-html']);
+gulp.task('txt-reload', ['compile-txt']);
 gulp.task('css-reload', ['compile-css']);
 gulp.task('js-reload', ['compile-js']);
 gulp.task('vertex-shader-reload', ['compile-vertex-shaders']);
@@ -342,6 +352,7 @@ var gulpServe=function(){
   gulp.watch("template.html", ['template-reload']);
   gulp.watch("css/*.css", ['css-reload']);
   gulp.watch("html/*.html", ['html-reload']);
+  gulp.watch("txt/*.txt", ['txt-reload']);
 };
 //server task
 gulp.task('serve', htmlReloadTasks, function() {
