@@ -1,3 +1,5 @@
+==BASIC==
+
 Vertex
   A point defined in 3 dimensional space. Values are used to
   describe this point. For example, (x,y,z) is used to determine "left", "top",
@@ -62,3 +64,43 @@ Buffer
   generated the image, in memory.
 Frame Buffer
   A special type of buffer; the current buffer that's visible on screen.
+
+==LIGHTING==
+
+Per vertex lighting
+  Define light for each vertex. The fragments between vertices use linear
+  interpolation to light them as if they were flat (not curved).
+Per fragment lighting
+  Define light for each vertex. The fragments between vertices use
+  calculation to determine the gradient adjustment to the light. This makes
+  curved surfaces light up more realistically.
+Phong Reflection Model
+  A strategy for defining lighting. This model
+  pretends that there are 2 different types of scene lighting:
+
+  1) Directional Light
+    Light that comes from specific directions and only lights up things that
+    face the direction it's coming from.
+  2) Ambient Light
+    Light that comes from everywhere and lights up everything evenly,
+    regardless of which way it faces.
+      - Objects have their own RGB value for ambient lighting.
+
+  Similarly, there are 2 different types of reflected lighting:
+
+  1) Diffuse Light
+    This is the glow. Regardless of the angle at which light hits a surface,
+    it's bounced off evenly in all directions.
+      - Objects have their own RGB value for diffuse lighting.
+  2) Specular Light
+    The portion of the light that bounces off the surface at the same angle
+    at which it hit. Specular reflection is what causes
+    "glints" or "highlights" on objects, depending on the reflectivity of the
+    material.
+      - Objects have their own RGB value for specular lighting.
+      - Objects have a shininess value to determine the detail of
+        specular reflection
+Normal
+  In geometry, a normal is an object such as a line or vector that is
+  perpendicular to a given object. For example, a beam of light shining
+  directly on a surface at 90 degrees.
