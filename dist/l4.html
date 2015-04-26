@@ -273,12 +273,12 @@ void main(void) {
 </script>
 
 <script name="main" type="text/javascript">
-var canvas=document.getElementById('canvas');
-var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
-// [main.js]
+// [standard.js]
+var gl;
+
 function initGL(canvas) {
     try {
-        gl = canvas.getContext("experimental-webgl");
+        gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
         gl.viewportWidth = canvas.clientWidth;
         gl.viewportHeight = canvas.clientWidth;
     } catch (e) {
@@ -287,6 +287,7 @@ function initGL(canvas) {
         alert("Could not initialise WebGL, sorry :-(");
     }
 }
+
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
@@ -316,7 +317,12 @@ function getShader(gl, id) {
     }
     return shader;
 }
+
+// [/standard.js]
+
+// [main.js]
 var shaderProgram;
+
 function initShaders() {
     var fragmentShader = getShader(gl, "f-shader");
     var vertexShader = getShader(gl, "v-shader");
@@ -343,6 +349,7 @@ function initShaders() {
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
+
 var mvMatrix = mat4.create();
 var mvMatrixStack = [];
 var pMatrix = mat4.create();
@@ -374,6 +381,7 @@ var pyramidVertexColorBuffer;
 var cubeVertexPositionBuffer;
 var cubeVertexColorBuffer;
 var cubeVertexIndexBuffer;
+
 function initBuffers() {
   pyramidVertexPositionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
@@ -583,6 +591,7 @@ function drawScene() {
 }
 
 var lastTime = 0;
+
 function animate() {
   /*the amount by which we rotate the objects is determined by
   how long it has been since the function was last called*/
@@ -624,5 +633,5 @@ function webGLStart() {
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l4", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/webgl-utils.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l4", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "js/webgl-utils.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
 </html>

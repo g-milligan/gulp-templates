@@ -338,13 +338,14 @@ void main(void) {
 </div>
 
 <script name="main" type="text/javascript">
+// [standard.js]
 var gl;
-// [main.js]
+
 function initGL(canvas) {
     try {
-        gl = canvas.getContext("experimental-webgl");
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
+        gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+        gl.viewportWidth = canvas.clientWidth;
+        gl.viewportHeight = canvas.clientWidth;
     } catch (e) {
     }
     if (!gl) {
@@ -352,13 +353,11 @@ function initGL(canvas) {
     }
 }
 
-
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
         return null;
     }
-
     var str = "";
     var k = shaderScript.firstChild;
     while (k) {
@@ -367,7 +366,6 @@ function getShader(gl, id) {
         }
         k = k.nextSibling;
     }
-
     var shader;
     if (shaderScript.type == "x-shader/x-fragment") {
         shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -376,19 +374,18 @@ function getShader(gl, id) {
     } else {
         return null;
     }
-
     gl.shaderSource(shader, str);
     gl.compileShader(shader);
-
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         alert(gl.getShaderInfoLog(shader));
         return null;
     }
-
     return shader;
 }
 
+// [/standard.js]
 
+// [main.js]
 var shaderProgram;
 
 function initShaders() {
@@ -1038,5 +1035,5 @@ function webGLStart() {
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l16", "files":["html/controls.html", "json/macbook.json", "css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/webgl-utils.js", "glsl/each-frag-light.vert", "glsl/each-frag-light.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l16", "files":["html/controls.html", "json/macbook.json", "css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "js/webgl-utils.js", "glsl/each-frag-light.vert", "glsl/each-frag-light.frag"]}[/@project] --></body>
 </html>

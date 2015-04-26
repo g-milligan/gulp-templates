@@ -94,12 +94,12 @@ void main(void) {
 </script>
 
 <script name="main" type="text/javascript">
-var canvas=document.getElementById('canvas');
-var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
-// [main.js]
+// [standard.js]
+var gl;
+
 function initGL(canvas) {
     try {
-        gl = canvas.getContext("experimental-webgl");
+        gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
         gl.viewportWidth = canvas.clientWidth;
         gl.viewportHeight = canvas.clientWidth;
     } catch (e) {
@@ -108,6 +108,7 @@ function initGL(canvas) {
         alert("Could not initialise WebGL, sorry :-(");
     }
 }
+
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
@@ -137,7 +138,12 @@ function getShader(gl, id) {
     }
     return shader;
 }
+
+// [/standard.js]
+
+// [main.js]
 var shaderProgram;
+
 function initShaders() {
     var fragmentShader = getShader(gl, "f-shader");
     var vertexShader = getShader(gl, "v-shader");
@@ -164,16 +170,20 @@ function initShaders() {
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
+
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
+
 function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
+
 var triangleVertexPositionBuffer;
 var triangleVertexColorBuffer;
 var squareVertexPositionBuffer;
 var squareVertexColorBuffer;
+
 function initBuffers() {
     triangleVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
@@ -223,6 +233,7 @@ function initBuffers() {
     triangleVertexColorBuffer.itemSize = 4;
     triangleVertexColorBuffer.numItems = 3;
 }
+
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     //get ready to draw color and depth
@@ -283,6 +294,7 @@ function drawScene() {
     surface in terms of the triangles that approximate it.*/
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
 }
+
 function webGLStart() {
     var canvas = document.getElementById("canvas");
     initGL(canvas);
@@ -297,5 +309,5 @@ function webGLStart() {
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l2", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l2", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
 </html>
