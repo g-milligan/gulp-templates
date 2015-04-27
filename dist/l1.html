@@ -46,16 +46,173 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 
 <canvas width="900" height="900" id="canvas">...your browser doesn't support canvas...</canvas>
 
+<!-- [doc.html] -->
+<div class="docWrap">
+
+  <a name="doc"></a>
+  <h1>Notes</h1>
+
+  <a name="standard"></a>
+  <h2>standard.js</h2>
+
+  <a name="function_initGL"></a>
+  <h3><dk>function</dk> <fn>initGL()</fn></h3>
+  <p>Initialize the "gl" context. Start off the webgl application. This function is pretty basic.</p>
+  <table>
+    <tr>
+      <td>Get the webgl context. Save it in a variable called, "gl".</td>
+      <td><v>gl</v>=<v>canvas</v>.<fn>getContext</fn>(<str>'webgl'</str>) || <v>canvas</v>.<fn>getContext</fn>(<str>'experimental-webgl'</str>);</td>
+    </tr>
+    <tr>
+      <td>Create custom properties for width and height on the "gl" object (used later).</td>
+      <td>
+        <v>gl</v>.<cpr>viewportWidth</cpr> = <v>canvas</v>.<npr>clientWidth</npr>;<br />
+          <v>gl</v>.<cpr>viewportHeight</cpr> = <v>canvas</v>.<npr>clientWidth</npr>;
+      </td>
+    </tr>
+  </table>
+
+  <a name="function_getShader"></a>
+  <h3><dk>function</dk> <fn>getShader(<v>gl</v>, <v>id</v>)</fn></h3>
+  <p>Get a script tag, with <fn>getElementById(<str>'the-id'</str>)</fn>. Read the string contents of the script, compile the string as shader code, and return a shader object.</p>
+
+  <a name="main"></a>
+  <h2>main.js</h2>
+
+  <a name="function_webGLStart"></a>
+  <h3><dk>function</dk> <fn>webGLStart()</fn></h3>
+  <p>Start the webgl application by calling a series of functions that handle one of the primary logical processes.</p>
+  <p>This is the onload function, triggered by <dk>&lt;body <fn>onload</fn>="javascript:<fn>webGLStart()</fn>;"&gt;</dk></p>
+  <table>
+    <tr>
+      <td><fn>webGLStart()</fn> provides an overview of each of the primary processes.</td>
+      <td>
+        <fn>initGL()</fn>; <br />
+        <fn>initShaders()</fn>; <br />
+        <fn>initBuffers()</fn>; <br />
+        <v>gl</v>.<fn>clearColor(<int>0.0, 0.0, 0.0, 1.0</int>)</fn>; <br />
+        <v>gl</v>.<fn>enable(<v>gl</v>.<npr>DEPTH_TEST</npr>)</fn>; <comment>/*enable removing things that <br />&nbsp;&nbsp;&nbsp;get hidden behind other things to save processing*/</comment> <br />
+        <fn>drawScene()</fn>; <comment>//do it</comment>
+      </td>
+    </tr>
+  </table>
+
+  <a name="function_initShaders"></a>
+  <h3><dk>function</dk> <fn>initShaders()</fn></h3>
+  <p>Create and configure shader objects.</p>
+  <p>A global variable, <dk>var</dk> <v>shaderProgram</v>; is initialized within <fn>initShaders()</fn>.</p>
+  <table>
+    <tr>
+      <td>We need two shaders to create a shader "program": One vertex and one fragment shader. Use the <fn>getShader()</fn> function to get these compiled shader objects.</td>
+      <td>
+        <dk>var</dk> <v>fragmentShader</v> = <fn>getShader(<v>gl</v>, <str>"f-shader"</str>)</fn>; <br />
+        <dk>var</dk> <v>vertexShader</v> = <fn>getShader(<v>gl</v>, <str>"v-shader"</str>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Initialize the shader program that will receive the two shaders.
+        Link the two shaders to this program object, <v>shaderProgram</v>.
+      </td>
+      <td>
+        <v>shaderProgram</v> = <v>gl</v>.<fn>createProgram()</fn>; <br />
+        <v>gl</v>.<fn>attachShader(<v>shaderProgram</v>, <v>vertexShader</v>)</fn>; <br />
+        <v>gl</v>.<fn>attachShader(<v>shaderProgram</v>, <v>fragmentShader</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Link the program to the <v>gl</v> context object.
+      </td>
+      <td>
+        <v>gl</v>.<fn>linkProgram(<v>shaderProgram</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Display an error message if the shader program failed to link.
+      </td>
+      <td>
+        <dk>if</dk> (!<v>gl</v>.<fn>getProgramParameter(<v>shaderProgram</v>, <v>gl</v>.<npr>LINK_STATUS</npr>)</fn>) { <br />
+        &nbsp;&nbsp;&nbsp;<fn>alert(<str>"Could not initialise shaders"</str>)</fn>; <br />
+        }
+      </td>
+    </tr>
+    <tr>
+      <td>
+        "Use" the program so that values can be pointed, from shaders, to javascript properties.
+      </td>
+      <td>
+        <v>gl</v>.<fn>useProgram(<v>shaderProgram</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Create a "pointer" that can be used to pass values, from javascript, to the shader program's <str>"aVertexPosition"</str> attribute. <br /><br />
+        The pointer is stored in a custom property, <cpr>vertexPositionAttribute</cpr>. <br /><br />
+        Before this pointer can be used, <fn>enableVertexAttribArray()</fn> must be called on it since it represents an <dk>attribute</dk> type value.
+      </td>
+      <td>
+        <v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr> = <br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<v>gl</v>.<fn>getAttribLocation(<v>shaderProgram</v>, <str>"aVertexPosition"</str>)</fn>; <br /><br />
+        <v>gl</v>.<fn>enableVertexAttribArray(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Similarly, create two more "pointers", from the shader program, to javascript custom properties. <br /><br />
+        This time, <fn>enableVertexAttribArray()</fn> isn't needed because these shader types are of <dk>uniform</dk> type instead of <dk>attribute</dk> type.
+      </td>
+      <td>
+        <v>shaderProgram</v>.<cpr>pMatrixUniform</cpr> = <v>gl</v>.<fn>getUniformLocation(<v>shaderProgram</v>, <str>"uPMatrix"</str>)</fn>; <br />
+        <v>shaderProgram</v>.<cpr>mvMatrixUniform</cpr> = <v>gl</v>.<fn>getUniformLocation(<v>shaderProgram</v>, <str>"uMVMatrix"</str>)</fn>;
+      </td>
+    </tr>
+  </table>
+
+  <a name="function_initBuffers"></a>
+  <h3><dk>function</dk> <fn>initBuffers()</fn></h3>
+
+  <a name="function_drawScene"></a>
+  <h3><dk>function</dk> <fn>drawScene()</fn></h3>
+
+</div>
+
+<!-- [/doc.html] -->
+
 <style type="text/css">
 /* [styles.css] */
 #canvas{margin:auto;display:block;}
 /* [/styles.css] */
-</style>
 
-<script name="webgl-utils" type="text/javascript">
-// [webgl-utils.js]
-// [/webgl-utils.js]
-</script>
+/* [doc.css] */
+html{font-size:20px;}
+.docWrap{font-size:1rem;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;}
+.docWrap h2:before,.docWrap h3:before{content:"";display:inline-block;margin-right:.5rem;width:1rem;height:1rem;background-position:center;background-repeat:no-repeat;background-size:100%;min-height:25px;vertical-align:middle;}
+.docWrap h2:before{background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAZCAYAAAAxFw7TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjAzQ0FFRkFFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjAzQ0FFRjlFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9Ijk0ODZFOTI2MDYxNkU0RDQ4NDY2NDdCMzBFMDc3RjZGIiBzdFJlZjpkb2N1bWVudElEPSI5NDg2RTkyNjA2MTZFNEQ0ODQ2NjQ3QjMwRTA3N0Y2RiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PmaIkJgAAAKSSURBVHja5JVLaBNBGMf/s7vZ5tFNk1BNYxNsa6UV6xMVrFD14i2XHnpRBEWkIB7Uo16EBPSiIhFFRQ8iiFI8eFI8lGpBoT4jFZ8xmsbU2EaTmCabza7frrQWmmISvfmxs4+Znd/+v8fMMu/N0FXVZfOjqKBSYxyHkqZBHI0dH9pzIDhriGOLBi9pTCmhGtOBqqpCGZ+A6WvuyPDeQ8HfREXNokrT9JOqQSNowWUO9Fw4eXgGOD1etTE6FBVMVpB1ioFN508YUKEmmK6BY2CiCMgy3TLIjZZAz8VTWm1AcpcRhHc7wVTNkKuR4mITC9aoUBdJUFIJjpuOgB6/HFfJ3I1OD0JdW+Gz1M9RSumeaZSk0rxAd50V/YtXIFtSsExyYU3DArRZGyDyAva1rJr34/O6vMu3HH53K9Y73PCZJaNvt6/LgDWb6/E8ncS9yficeWUV8hTwUOQxvhdldNa7YBdEWDgB7bYGA/YgFcf9yc9lhZQFrrQ3wt/UDgu5J9ArQ4kYLkfCWMhbjXGnyYJezxK0WO2Vuby/dTU6bM5f2Sup2P7oBqAU0OdeCsFsIqUOHGxbiyuxlzgXDf8ZeG3sFWVUwo7mTpgEE66v60M0n4FHsmO8mMOLzARGqQ2Xcbss8G7yEwSqsV5yW+R4dLu92ELXhPzDKOiCquBM9JleipXFkCoKgY5uOEx1GPmWQErJI6cW8WEqjaQ8hQ2OJmx2eStPim6nI09xJxlFf3gQA4l3Rt9ZitfOJ7dxa/w9uRuvrg5j+SyOvn4IMy2tN9kUxuj5SyGHtCLj2NuR6gt79t43OBEzWiXG4R/b/wjUBCYZ+9lfGqMq13gmCVymMKBKdduYotX8vzIWA8+D5YsffwowALpu6jBU8hhKAAAAAElFTkSuQmCC');}
+.docWrap h3:before{background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAZCAYAAAAxFw7TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjAzQ0FFRkVFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjAzQ0FFRkRFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9Ijk0ODZFOTI2MDYxNkU0RDQ4NDY2NDdCMzBFMDc3RjZGIiBzdFJlZjpkb2N1bWVudElEPSI5NDg2RTkyNjA2MTZFNEQ0ODQ2NjQ3QjMwRTA3N0Y2RiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjFiNiEAAAODSURBVHjarJVrSBRRFMfPnZl9ujutu2ZrWvmAzF72VEPUyC89IbGCIuhTUUQQQdSXog9RBNIDogjqQ9ADI4KKTBAyDMKCRcUUjXZdsyzdtt11133M7sx07jar46P0g3f5weyZe8/cc87/nktkWYa5HAzM8Zhzh9x0xq+RIPyIjQJLSMq0GjEhfqSbGmim9CwLK80ZQGZyeNPdATfcbcBzWvq3DHmnzI0g65CemCRCkSkdPpTvnxpyQpYgjtAxEA1Zm70DF+dx2jVahgWERzjl2YCY6bOeYWsionjlWzTIqh0SWmVnOEDeer/BGn5+zomu5ge9IV+lgeU8+P6uEu4O1ZoG5BNyKiwmuBKL/eHtVVuO5xn4wJhDukOvEIU6l+Ps9b62y3adEWYjJoK/Qcz1mYL1tZcKy5+Nhfw1EiIvhlxQact5bNPqndIsKyrIIqww21q2ZeY2yuoc5ht5+fDilbArM6//QPayulAiPnmtC+mi31YbI2IijmtOawgTJuoqjyQEeO8bLPPFY0uaPP1HMX+pNfTD15ALCP2KEbmD1NKIjaxG83LIdbKYz6gXJKmz1GJ3JXPYHvAsLW990s0RhjUyHHCoPyUEN7IMiak2tgD5QnVJkgqRISTGwcJpnU2ltZuSW2EIMZlYDYsOkyJVFcRH10wKP5ay0XlU/PM4HToV8lGbfOroBUfFeBC/JFI9qpSfjVgmOcxEdH+rDEn9+hMxabnJ1mLV6r3JkPsjQdI2MlyIOdE/Huw98vyn85hxPI9UdyeQEGJDHiJr6QvUoVxjLzhXac1prLJlO3MNvD+5qi8cgCprTk+6RgdvvAPuhDxBONuRzUpR6M70qRd03mID345H0IHOxk9Katzq79h5/nPrIx0eLzILHUq4lmGYvqtFFRX7spZ+n9K+fgmRYn88ZlYZhRmOCvwWonm/49HyafvhweyiuuqMRfeoDHCuA03VyPVJbs4iezAuNz16OzJzz9s0hqeyujmoB1Yb9jpeHfoYGGrAjkIbxFbktWoKLUg7SmRhYVp6RUPJ7vrukBdKLVnJqk/p2GmsBjZa7PdxgUcx0dwM0KIqRzCg2AdlkOvNnAbKFGf/bLC0eSrCpfM6kQ0IrzjzpERNETFCbryzT+9QUloaksrHsAKoJSPKU/sSme4a/R4NwbAQBvY/d5iE+8McQ6HJOuFOIXN9L/8RYACzkmut09A6fgAAAABJRU5ErkJggg==');}
+.docWrap h2{background-color:#5A72B0;color:#fff;padding:.3rem .5rem;border-radius:.5rem 0 0 0;margin-bottom:0;}
+.docWrap h3{border-radius:0 0 .5rem 0;margin-top:0;padding:.3rem .5rem;background-color:#EAEAEA;}
+.docWrap table{display:block;width:100%;border-collapse:collapse;border:solid 1px #eaeaea;margin-bottom:1rem;}
+.docWrap table tr{}
+.docWrap table tr td{vertical-align:top;width:50%;padding:1rem;font-size:1rem;}
+.docWrap table tr:nth-child(even) td{background-color:#FAFAFA;border-top:dashed 1px #eaeaea;}
+.docWrap table tr:nth-child(odd) td{border-top:dashed 1px #eaeaea;}
+.docWrap table tr:first-child td{border-top:none;}
+.docWrap table tr td:first-child{color:#007400;padding-right:2rem;}
+.docWrap table tr td:last-child{padding-left:0;font-family:'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;white-space:nowrap;}
+/*code highlighting*/
+.docWrap fn{color:#994500;} /*function name*/
+.docWrap dk{color:#881280;font-weight:bold;} /*declaring keyword, eg: "function", "var", "return", "for", "if", etc... */
+.docWrap npr{color:#1a1aa6;} /*native property*/
+.docWrap cpr{color:#2626e2;font-style:italic;} /*custom property*/
+.docWrap str{color:#007400;} /*string literal value*/
+.docWrap int{color:#990000;font-weight:bold;} /*integer literal value*/
+.docWrap comment{color:#007400;} /*code comment*/
+.docWrap v{color:#6f3200;font-weight:bold;} /*variable object*/
+
+/* [/doc.css] */
+</style>
 
 <script id="v-shader" type="x-shader/x-vertex">
 // [shader.vert]
@@ -83,8 +240,9 @@ void main(void) {
 <script name="main" type="text/javascript">
 // [standard.js]
 var gl;
+var canvas = document.getElementById("canvas");
 
-function initGL(canvas) {
+function initGL() {
     try {
         gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
         gl.viewportWidth = canvas.clientWidth;
@@ -176,6 +334,7 @@ function initBuffers() {
     //"size" refers to number of coordinate numbers that represent a single vertex.
     triangleVertexPositionBuffer.itemSize = 3; //three numbers per vertex (x,y,z)
     triangleVertexPositionBuffer.numItems = 3; //three vertices
+    
     squareVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
     vertices = [
@@ -241,8 +400,7 @@ function drawScene() {
 }
 
 function webGLStart() {
-    var canvas = document.getElementById("canvas");
-    initGL(canvas);
+    initGL();
     initShaders();
     initBuffers();
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -253,5 +411,5 @@ function webGLStart() {
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l1", "files":["css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l1", "files":["html/doc.html", "css/doc.css", "css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
 </html>
