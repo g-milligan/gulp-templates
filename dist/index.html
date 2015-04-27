@@ -4,6 +4,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+<!-- start docs stuff -->
+<link type="text/css" rel="stylesheet" href="doc/css/doc.css" />
+<!-- end docs stuff -->
+
 <script name="glMatrix-0.9.5.min.js" type="text/javascript">
 // [glMatrix-0.9.5.min.js]
 // glMatrix v0.9.5
@@ -90,7 +94,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
         <fn>initGL()</fn>; <br />
         <fn>initShaders()</fn>; <br />
         <fn>initBuffers()</fn>; <br />
-        <v>gl</v>.<fn>clearColor(<int>0.0, 0.0, 0.0, 1.0</int>)</fn>; <br />
+        <v>gl</v>.<fn>clearColor(<no>0.0, 0.0, 0.0, 1.0</no>)</fn>; <br />
         <v>gl</v>.<fn>enable(<v>gl</v>.<npr>DEPTH_TEST</npr>)</fn>; <comment>/*enable removing things that <br />&nbsp;&nbsp;&nbsp;get hidden behind other things to save processing*/</comment> <br />
         <fn>drawScene()</fn>; <comment>//do it</comment>
       </td>
@@ -173,6 +177,142 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <a name="function_initBuffers"></a>
   <h3><dk>function</dk> <fn>initBuffers()</fn></h3>
 
+  <p>Initialize two buffers for the two shapes. Two buffers are stored as global variables: <br />
+    <dk>var</dk> <v>triangleVertexPositionBuffer</v>; <br />
+    <dk>var</dk> <v>squareVertexPositionBuffer</v>;
+  </p>
+
+  <table>
+    <tr>
+      <td cospan="2">
+        Triangle buffer...
+      </td>
+    </tr>
+    <tr>
+      <td>
+        TRIANGLE: Initialize a buffer for the triangle shape. <br />
+        Bind <v>triangleVertexPositionBuffer</v> to <npr>ARRAY_BUFFER</npr> so that  <br />
+        <v>triangleVertexPositionBuffer</v> is recognized as the triangle buffer <br />
+        throughout the javascript code.
+      </td>
+      <td>
+        <v>triangleVertexPositionBuffer</v> = <v>gl</v>.<fn>createBuffer()</fn>; <br />
+        <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>triangleVertexPositionBuffer</v>)</fn>; <br />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Define the three triangle vertices.
+      </td>
+      <td>
+        <dk>var</dk> <v>vertices</v> = [ <br />
+        &nbsp;&nbsp;&nbsp;<no>0.0,  1.0,  0.0,</no> <comment>//top center (x,y,z)</comment> <br />
+        &nbsp;&nbsp;&nbsp;<no>-1.0, -1.0,  0.0,</no> <comment>//bottom left</comment> <br />
+        &nbsp;&nbsp;&nbsp;<no>1.0, -1.0,  0.0</no> <comment>//bottom right</comment> <br />
+        ];
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Set the vertices to the buffer, <v>triangleVertexPositionBuffer</v>.
+      </td>
+      <td>
+        <v>gl</v>.<fn>bufferData(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <dk>new Float32Array(<v>vertices</v>)</dk>, <v>gl</v>.<npr>STATIC_DRAW</npr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Define some custom properties that are used later.
+      </td>
+      <td>
+        <v>triangleVertexPositionBuffer</v>.<cpr>itemSize</cpr> = <no>3</no>; <comment>//three numbers per vertex (x,y,z)</comment> <br />
+        <v>triangleVertexPositionBuffer</v>.<cpr>numItems</cpr> = <no>3</no>; <comment>//three vertices</comment>
+      </td>
+    </tr>
+    <tr>
+      <td cospan="2">
+        Square buffer...
+      </td>
+    </tr>
+    <tr>
+      <td>
+        SQUARE: Initialize a buffer for the square shape. <br />
+        Bind <v>squareVertexPositionBuffer</v> to <npr>ARRAY_BUFFER</npr> so that  <br />
+        <v>squareVertexPositionBuffer</v> is recognized as the square buffer <br />
+        throughout the javascript code.
+      </td>
+      <td>
+        <v>squareVertexPositionBuffer</v> = <v>gl</v>.<fn>createBuffer()</fn>; <br />
+        <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>squareVertexPositionBuffer</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Define the four square vertices.
+      </td>
+      <td>
+        <v>vertices</v> = [ <br />
+        &nbsp;&nbsp;&nbsp;<no>1.0,  1.0,  0.0</no>, <comment>//top right</comment> <br />
+        &nbsp;&nbsp;&nbsp;<no>-1.0,  1.0,  0.0</no>, <comment>//top left</comment> <br />
+        &nbsp;&nbsp;&nbsp;<no>1.0, -1.0,  0.0</no>, <comment>//bottom right</comment> <br />
+        &nbsp;&nbsp;&nbsp;<no>-1.0, -1.0,  0.0</no> <comment>//bottom left</comment> <br />
+        ];
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Set the vertices to the buffer, <v>squareVertexPositionBuffer</v>.
+      </td>
+      <td>
+        <v>gl</v>.<fn>bufferData(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <dk>new Float32Array(<v>vertices</v>)</dk>, <v>gl</v>.<npr>STATIC_DRAW</npr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Define some custom properties that are used later.
+      </td>
+      <td>
+        <v>squareVertexPositionBuffer</v>.<cpr>itemSize</cpr> = <no>3</no>; <br />
+        <v>squareVertexPositionBuffer</v>.<cpr>numItems</cpr> = <no>4</no>;
+      </td>
+    </tr>
+  </table>
+
+
+  <div>
+    <v>gl</v>.<fn>viewport(<no>0</no>, <no>0</no>, <v>gl</v>.<cpr>viewportWidth</cpr>, <v>gl</v>.<cpr>viewportHeight</cpr>)</fn>; <br />
+
+    <v>gl</v>.<fn>clear(<v>gl</v>.<npr>COLOR_BUFFER_BIT</npr> | <v>gl</v>.<npr>DEPTH_BUFFER_BIT</npr>)</fn>; <br />
+
+    <v>mat4</v>.<fn>perspective(<no>45</no>, <v>gl</v>.<cpr>viewportWidth</cpr> / <v>gl</v>.<cpr>viewportHeight</cpr>, <no>0.1</no>, <no>100.0</no>, <v>pMatrix</v>)</fn>; <br />
+
+    <v>mat4</v>.<fn>identity(<v>mvMatrix</v>)</fn>; <br />
+
+    <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>-1.5, 0.0, -7.0</no>])</fn>; <br />
+
+    <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>triangleVertexPositionBuffer</v>)</fn>; <br />
+
+    <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <v>triangleVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>; <br />
+
+    <fn>setMatrixUniforms()</fn>; <br />
+
+    <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLES</npr>, <no>0</no>, <v>triangleVertexPositionBuffer</v>.<v>numItems</v>)</fn>; <br />
+
+    <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>3.0, 0.0, 0.0</no>])</fn>; <br />
+
+    <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>squareVertexPositionBuffer</v>)</fn>; <br />
+
+    <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <v>squareVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>; <br />
+
+    <fn>setMatrixUniforms()</fn>; <br />
+
+    <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLE_STRIP</npr>, <no>0</no>, <v>squareVertexPositionBuffer</v>.<cpr>numItems</cpr>)</fn>;
+  <div>
+
+
+
+
+
   <a name="function_drawScene"></a>
   <h3><dk>function</dk> <fn>drawScene()</fn></h3>
 
@@ -184,34 +324,6 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 /* [styles.css] */
 #canvas{margin:auto;display:block;}
 /* [/styles.css] */
-
-/* [doc.css] */
-html{font-size:20px;}
-.docWrap{font-size:1rem;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;}
-.docWrap h2:before,.docWrap h3:before{content:"";display:inline-block;margin-right:.5rem;width:1rem;height:1rem;background-position:center;background-repeat:no-repeat;background-size:100%;min-height:25px;vertical-align:middle;}
-.docWrap h2:before{background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAZCAYAAAAxFw7TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjAzQ0FFRkFFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjAzQ0FFRjlFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9Ijk0ODZFOTI2MDYxNkU0RDQ4NDY2NDdCMzBFMDc3RjZGIiBzdFJlZjpkb2N1bWVudElEPSI5NDg2RTkyNjA2MTZFNEQ0ODQ2NjQ3QjMwRTA3N0Y2RiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PmaIkJgAAAKSSURBVHja5JVLaBNBGMf/s7vZ5tFNk1BNYxNsa6UV6xMVrFD14i2XHnpRBEWkIB7Uo16EBPSiIhFFRQ8iiFI8eFI8lGpBoT4jFZ8xmsbU2EaTmCabza7frrQWmmISvfmxs4+Znd/+v8fMMu/N0FXVZfOjqKBSYxyHkqZBHI0dH9pzIDhriGOLBi9pTCmhGtOBqqpCGZ+A6WvuyPDeQ8HfREXNokrT9JOqQSNowWUO9Fw4eXgGOD1etTE6FBVMVpB1ioFN508YUKEmmK6BY2CiCMgy3TLIjZZAz8VTWm1AcpcRhHc7wVTNkKuR4mITC9aoUBdJUFIJjpuOgB6/HFfJ3I1OD0JdW+Gz1M9RSumeaZSk0rxAd50V/YtXIFtSsExyYU3DArRZGyDyAva1rJr34/O6vMu3HH53K9Y73PCZJaNvt6/LgDWb6/E8ncS9yficeWUV8hTwUOQxvhdldNa7YBdEWDgB7bYGA/YgFcf9yc9lhZQFrrQ3wt/UDgu5J9ArQ4kYLkfCWMhbjXGnyYJezxK0WO2Vuby/dTU6bM5f2Sup2P7oBqAU0OdeCsFsIqUOHGxbiyuxlzgXDf8ZeG3sFWVUwo7mTpgEE66v60M0n4FHsmO8mMOLzARGqQ2Xcbss8G7yEwSqsV5yW+R4dLu92ELXhPzDKOiCquBM9JleipXFkCoKgY5uOEx1GPmWQErJI6cW8WEqjaQ8hQ2OJmx2eStPim6nI09xJxlFf3gQA4l3Rt9ZitfOJ7dxa/w9uRuvrg5j+SyOvn4IMy2tN9kUxuj5SyGHtCLj2NuR6gt79t43OBEzWiXG4R/b/wjUBCYZ+9lfGqMq13gmCVymMKBKdduYotX8vzIWA8+D5YsffwowALpu6jBU8hhKAAAAAElFTkSuQmCC');}
-.docWrap h3:before{background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAZCAYAAAAxFw7TAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAxZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDE0IDc5LjE1Njc5NywgMjAxNC8wOC8yMC0wOTo1MzowMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjAzQ0FFRkVFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjAzQ0FFRkRFNDk3MTFFNEExNzFFM0FENEZBRTJGQUQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9Ijk0ODZFOTI2MDYxNkU0RDQ4NDY2NDdCMzBFMDc3RjZGIiBzdFJlZjpkb2N1bWVudElEPSI5NDg2RTkyNjA2MTZFNEQ0ODQ2NjQ3QjMwRTA3N0Y2RiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjFiNiEAAAODSURBVHjarJVrSBRRFMfPnZl9ujutu2ZrWvmAzF72VEPUyC89IbGCIuhTUUQQQdSXog9RBNIDogjqQ9ADI4KKTBAyDMKCRcUUjXZdsyzdtt11133M7sx07jar46P0g3f5weyZe8/cc87/nktkWYa5HAzM8Zhzh9x0xq+RIPyIjQJLSMq0GjEhfqSbGmim9CwLK80ZQGZyeNPdATfcbcBzWvq3DHmnzI0g65CemCRCkSkdPpTvnxpyQpYgjtAxEA1Zm70DF+dx2jVahgWERzjl2YCY6bOeYWsionjlWzTIqh0SWmVnOEDeer/BGn5+zomu5ge9IV+lgeU8+P6uEu4O1ZoG5BNyKiwmuBKL/eHtVVuO5xn4wJhDukOvEIU6l+Ps9b62y3adEWYjJoK/Qcz1mYL1tZcKy5+Nhfw1EiIvhlxQact5bNPqndIsKyrIIqww21q2ZeY2yuoc5ht5+fDilbArM6//QPayulAiPnmtC+mi31YbI2IijmtOawgTJuoqjyQEeO8bLPPFY0uaPP1HMX+pNfTD15ALCP2KEbmD1NKIjaxG83LIdbKYz6gXJKmz1GJ3JXPYHvAsLW990s0RhjUyHHCoPyUEN7IMiak2tgD5QnVJkgqRISTGwcJpnU2ltZuSW2EIMZlYDYsOkyJVFcRH10wKP5ay0XlU/PM4HToV8lGbfOroBUfFeBC/JFI9qpSfjVgmOcxEdH+rDEn9+hMxabnJ1mLV6r3JkPsjQdI2MlyIOdE/Huw98vyn85hxPI9UdyeQEGJDHiJr6QvUoVxjLzhXac1prLJlO3MNvD+5qi8cgCprTk+6RgdvvAPuhDxBONuRzUpR6M70qRd03mID345H0IHOxk9Katzq79h5/nPrIx0eLzILHUq4lmGYvqtFFRX7spZ+n9K+fgmRYn88ZlYZhRmOCvwWonm/49HyafvhweyiuuqMRfeoDHCuA03VyPVJbs4iezAuNz16OzJzz9s0hqeyujmoB1Yb9jpeHfoYGGrAjkIbxFbktWoKLUg7SmRhYVp6RUPJ7vrukBdKLVnJqk/p2GmsBjZa7PdxgUcx0dwM0KIqRzCg2AdlkOvNnAbKFGf/bLC0eSrCpfM6kQ0IrzjzpERNETFCbryzT+9QUloaksrHsAKoJSPKU/sSme4a/R4NwbAQBvY/d5iE+8McQ6HJOuFOIXN9L/8RYACzkmut09A6fgAAAABJRU5ErkJggg==');}
-.docWrap h2{background-color:#5A72B0;color:#fff;padding:.3rem .5rem;border-radius:.5rem 0 0 0;margin-bottom:0;}
-.docWrap h3{border-radius:0 0 .5rem 0;margin-top:0;padding:.3rem .5rem;background-color:#EAEAEA;}
-.docWrap table{display:block;width:100%;border-collapse:collapse;border:solid 1px #eaeaea;margin-bottom:1rem;}
-.docWrap table tr{}
-.docWrap table tr td{vertical-align:top;width:50%;padding:1rem;font-size:1rem;}
-.docWrap table tr:nth-child(even) td{background-color:#FAFAFA;border-top:dashed 1px #eaeaea;}
-.docWrap table tr:nth-child(odd) td{border-top:dashed 1px #eaeaea;}
-.docWrap table tr:first-child td{border-top:none;}
-.docWrap table tr td:first-child{color:#007400;padding-right:2rem;}
-.docWrap table tr td:last-child{padding-left:0;font-family:'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;white-space:nowrap;}
-/*code highlighting*/
-.docWrap fn{color:#994500;} /*function name*/
-.docWrap dk{color:#881280;font-weight:bold;} /*declaring keyword, eg: "function", "var", "return", "for", "if", etc... */
-.docWrap npr{color:#1a1aa6;} /*native property*/
-.docWrap cpr{color:#2626e2;font-style:italic;} /*custom property*/
-.docWrap str{color:#007400;} /*string literal value*/
-.docWrap int{color:#990000;font-weight:bold;} /*integer literal value*/
-.docWrap comment{color:#007400;} /*code comment*/
-.docWrap v{color:#6f3200;font-weight:bold;} /*variable object*/
-
-/* [/doc.css] */
 </style>
 
 <script id="v-shader" type="x-shader/x-vertex">
@@ -411,5 +523,5 @@ function webGLStart() {
 // [/main.js]
 </script>
 
-<!-- [@project]{"name":"l1", "files":["html/doc.html", "css/doc.css", "css/styles.css", "js/glMatrix-0.9.5.min.js", "js/main.js", "js/standard.js", "glsl/shader.vert", "glsl/shader.frag"]}[/@project] --></body>
+<!-- [@project]{"name":"l1", "files":["html/doc.html"]}[/@project] --></body>
 </html>

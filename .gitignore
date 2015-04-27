@@ -1,10 +1,10 @@
 .DS_Store
 .bck
-css
-glsl
-js
-html
-txt
-json
+/css
+/glsl
+/js
+/html
+/txt
+/json
 template.html
 node_modules
