@@ -318,7 +318,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <a name="function_setMatrixUniforms"></a>
   <h3><dk>function</dk> <fn>setMatrixUniforms()</fn></h3>
   <p>Two global variables are used to represent the perspective, and model view matrix in JavaScript: <br /><br />
-    <dk>var</dk> <v>mvMatrix</v> = <v>mat4</v>.<fn>create()</fn>; <comment>//create a basic, 4-numbered object, (n, n, n, n)<br />
+    <dk>var</dk> <v>mvMatrix</v> = <v>mat4</v>.<fn>create()</fn>; <comment>//create a basic, 4x4 matrix object, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]<br />
     <dk>var</dk> <v>pMatrix</v> = <v>mat4</v>.<fn>create()</fn>; <br /><br />
     These javascript values get passed to the shaders in <fn>setMatrixUniforms()</fn>
   </p>
