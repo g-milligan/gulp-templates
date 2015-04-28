@@ -80,9 +80,40 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <h3><dk>function</dk> <fn>getShader(<v>gl</v>, <v>id</v>)</fn></h3>
   <p>Get a script tag, with <fn>getElementById(<str>'the-id'</str>)</fn>. Read the string contents of the script, compile the string as shader code, and return a shader object.</p>
 
+  <a name="shader_vert"></a>
+  <h2>shader.vert</h2>
+  <p>A <strong>vertex shader</strong> is run for every vertex. Use javascript to pass values, to the shader, that the GLSL shader code will process.</p>
+  <table>
+    <tr>
+      <td></td>
+      <td>
+        <dk>attribute vec3</dk> <v>aVertexPosition</v>; <br />
+        <dk>uniform mat4</dk> <v>uMVMatrix</v>; <br />
+        <dk>uniform mat4</dk> <v>uPMatrix</v>; <br />
+        <dk>void</dk> <fn>main(<dk>void</dk>)</fn> { <br />
+        &nbsp;&nbsp;&nbsp;<v>gl_Position</v> = <v>uPMatrix</v> * <v>uMVMatrix</v> * <fn>vec4(<v>aVertexPosition</v>, <no>1.0</no>)</fn>; <br />
+        }
+      </td>
+    </tr>
+  </table>
+
+  <a name="shader_frag"></a>
+  <h2>shader.frag</h2>
+  <p>A <strong>fragment shader</strong> is run for every "fragment" or pixel <em>between</em> the vertices. Use javascript to pass values, to the shader, that the GLSL shader code will process.</p>
+  <table>
+    <tr>
+      <td></td>
+      <td>
+        <dk>precision mediump float</dk>; <br />
+        <dk>void</dk> <fn>main(<dk>void</dk>)</fn> { <br />
+        &nbsp;&nbsp;&nbsp;<v>gl_FragColor</v> = <fn>vec4(<no>1.0, 1.0, 1.0, 1.0</no>)</fn>; <br />
+        }
+      </td>
+    </tr>
+  </table>
+
   <a name="main"></a>
   <h2>main.js</h2>
-
   <a name="function_webGLStart"></a>
   <h3><dk>function</dk> <fn>webGLStart()</fn></h3>
   <p>Start the webgl application by calling a series of functions that handle one of the primary logical processes.</p>
@@ -106,6 +137,9 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <p>Create and configure shader objects.</p>
   <p>A global variable, <dk>var</dk> <v>shaderProgram</v>; is initialized within <fn>initShaders()</fn>.</p>
   <table>
+    <tr>
+      <td colspan="2">Create shaders</td>
+    </tr>
     <tr>
       <td>We need two shaders to create a shader "program": One vertex and one fragment shader. Use the <fn>getShader()</fn> function to get these compiled shader objects.</td>
       <td>
@@ -141,6 +175,9 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
         &nbsp;&nbsp;&nbsp;<fn>alert(<str>"Could not initialise shaders"</str>)</fn>; <br />
         }
       </td>
+    </tr>
+    <tr>
+      <td colspan="2">Connect GLSL values to javascript</td>
     </tr>
     <tr>
       <td>
@@ -274,6 +311,34 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
       <td>
         <v>squareVertexPositionBuffer</v>.<cpr>itemSize</cpr> = <no>3</no>; <br />
         <v>squareVertexPositionBuffer</v>.<cpr>numItems</cpr> = <no>4</no>;
+      </td>
+    </tr>
+  </table>
+
+  <a name="function_setMatrixUniforms"></a>
+  <h3><dk>function</dk> <fn>setMatrixUniforms()</fn></h3>
+  <p>Two global variables are used to represent the perspective, and model view matrix in JavaScript: <br /><br />
+    <dk>var</dk> <v>mvMatrix</v> = <v>mat4</v>.<fn>create()</fn>; <comment>//create a basic, 4-numbered object, (n, n, n, n)<br />
+    <dk>var</dk> <v>pMatrix</v> = <v>mat4</v>.<fn>create()</fn>; <br /><br />
+    These javascript values get passed to the shaders in <fn>setMatrixUniforms()</fn>
+  </p>
+  <table>
+    <tr>
+      <td>
+        <v>pMatrix</v> contains perspective changes, eg: field of view. Send the matrix to the shader program for processing. <br />
+        <v>shaderProgram</v>.<cpr>pMatrixUniform</cpr> is used as the pointer to the correct shader value.
+      </td>
+      <td>
+        <v>gl</v>.<fn>uniformMatrix4fv(<v>shaderProgram</v>.<cpr>pMatrixUniform</cpr>, <no>false</no>, <v>pMatrix</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <v>mvMatrix</v> contains movement changes, ie: shape position relative to the previous position. Send the matrix to the shader program for processing. <br />
+        <v>shaderProgram</v>.<cpr>mvMatrixUniform</cpr> is used as the pointer to the correct shader value.
+      </td>
+      <td>
+        <v>gl</v>.<fn>uniformMatrix4fv(<v>shaderProgram</v>.<cpr>mvMatrixUniform</cpr>, <no>false</no>, <v>mvMatrix</v>)</fn>;
       </td>
     </tr>
   </table>
