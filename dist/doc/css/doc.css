@@ -13,6 +13,7 @@ html{font-size:20px;}
 .docWrap table tr:first-child td{border-top:none;}
 .docWrap table tr td:first-child{color:#007400;padding-right:2rem;}
 .docWrap table tr td:last-child{padding-left:0;font-family:'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;white-space:nowrap;}
+.docWrap table tr td[colspan="2"]{padding-left:1rem;white-space:normal;background-color:#F4F4F4;color:#000;box-shadow:inset 0 0 .5rem rgba(0,0,0,.4);}
 /*code highlighting*/
 .docWrap fn{color:#994500;} /*function name*/
 .docWrap dk{color:#881280;font-weight:bold;} /*declaring keyword, eg: "function", "var", "return", "for", "if", etc... */

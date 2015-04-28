@@ -184,7 +184,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 
   <table>
     <tr>
-      <td cospan="2">
+      <td colspan="2">
         Triangle buffer...
       </td>
     </tr>
@@ -230,7 +230,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
       </td>
     </tr>
     <tr>
-      <td cospan="2">
+      <td colspan="2">
         Square buffer...
       </td>
     </tr>
@@ -280,42 +280,153 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 
 
   <div>
-    <v>gl</v>.<fn>viewport(<no>0</no>, <no>0</no>, <v>gl</v>.<cpr>viewportWidth</cpr>, <v>gl</v>.<cpr>viewportHeight</cpr>)</fn>; <br />
 
-    <v>gl</v>.<fn>clear(<v>gl</v>.<npr>COLOR_BUFFER_BIT</npr> | <v>gl</v>.<npr>DEPTH_BUFFER_BIT</npr>)</fn>; <br />
+     <br />
 
-    <v>mat4</v>.<fn>perspective(<no>45</no>, <v>gl</v>.<cpr>viewportWidth</cpr> / <v>gl</v>.<cpr>viewportHeight</cpr>, <no>0.1</no>, <no>100.0</no>, <v>pMatrix</v>)</fn>; <br />
+     <br />
 
-    <v>mat4</v>.<fn>identity(<v>mvMatrix</v>)</fn>; <br />
+     <br />
 
-    <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>-1.5, 0.0, -7.0</no>])</fn>; <br />
+     <br />
 
-    <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>triangleVertexPositionBuffer</v>)</fn>; <br />
+     <br />
 
-    <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <v>triangleVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>; <br />
 
-    <fn>setMatrixUniforms()</fn>; <br />
-
-    <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLES</npr>, <no>0</no>, <v>triangleVertexPositionBuffer</v>.<v>numItems</v>)</fn>; <br />
-
-    <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>3.0, 0.0, 0.0</no>])</fn>; <br />
-
-    <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>squareVertexPositionBuffer</v>)</fn>; <br />
-
-    <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <v>squareVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>; <br />
-
-    <fn>setMatrixUniforms()</fn>; <br />
-
-    <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLE_STRIP</npr>, <no>0</no>, <v>squareVertexPositionBuffer</v>.<cpr>numItems</cpr>)</fn>;
   <div>
-
-
-
-
 
   <a name="function_drawScene"></a>
   <h3><dk>function</dk> <fn>drawScene()</fn></h3>
-
+  <table>
+    <tr>
+      <td colspan="2">Scene setup</td>
+    </tr>
+    <tr>
+      <td>
+        Set the viewport dimensions.
+      </td>
+      <td>
+        <v>gl</v>.<fn>viewport(<no>0</no>, <no>0</no>, <v>gl</v>.<cpr>viewportWidth</cpr>, <v>gl</v>.<cpr>viewportHeight</cpr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Show the color and depth. The background will appear black (this color set earlier) etc...
+      </td>
+      <td>
+        <v>gl</v>.<fn>clear(<v>gl</v>.<npr>COLOR_BUFFER_BIT</npr> | <v>gl</v>.<npr>DEPTH_BUFFER_BIT</npr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Set the perspective of the scene.
+      </td>
+      <td>
+        <v>mat4</v>.<fn>perspective(<no>45</no>, <v>gl</v>.<cpr>viewportWidth</cpr> / <v>gl</v>.<cpr>viewportHeight</cpr>, <no>0.1</no>, <no>100.0</no>, <v>pMatrix</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Designate an initial model view matrix. Moving objects will require the
+        model view matrix to be recalculated into a new set of coordinates.
+        But for now, we have to start somewhere. This model view matrix is
+        bound to the variable, <v>mvMatrix</v>.
+      </td>
+      <td>
+        <v>mat4</v>.<fn>identity(<v>mvMatrix</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">Triangle draw</td>
+    </tr>
+    <tr>
+      <td>
+        -1.5 units (x=move left), 0 units (y=neither up nor down), -7 units (z=move forward) <br />
+        We are moving something in 3d space... in this case, we are moving the first shape, about to be bound, the triangle.
+      </td>
+      <td>
+        <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>-1.5, 0.0, -7.0</no>])</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Bind the triangle buffer as the active <npr>ARRAY_BUFFER</npr>.
+      </td>
+      <td>
+        <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>triangleVertexPositionBuffer</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Queu the changes so they can be sent to the shader program.
+      </td>
+      <td>
+        <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<v>triangleVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Send the changes to the shader program.
+      </td>
+      <td>
+        <fn>setMatrixUniforms()</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Draw the resulting figure.
+      </td>
+      <td>
+        <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLES</npr>, <no>0</no>, <v>triangleVertexPositionBuffer</v>.<cpr>numItems</cpr>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">Square draw</td>
+    </tr>
+    <tr>
+      <td>
+        move square 3 units x right, 0 units y, 0 units z.
+        This is relative to our previous call of translate, so when translate is called
+        again, it's relative to the last position.
+        The square ends up at (1.5, 0, -7)
+      </td>
+      <td>
+        <v>mat4</v>.<fn>translate(<v>mvMatrix</v>, [<no>3.0, 0.0, 0.0</no>])</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Bind the square buffer as the active <npr>ARRAY_BUFFER</npr>.
+      </td>
+      <td>
+        <v>gl</v>.<fn>bindBuffer(<v>gl</v>.<npr>ARRAY_BUFFER</npr>, <v>squareVertexPositionBuffer</v>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Queu the changes so they can be sent to the shader program.
+      </td>
+      <td>
+        <v>gl</v>.<fn>vertexAttribPointer(<v>shaderProgram</v>.<cpr>vertexPositionAttribute</cpr>, <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<v>squareVertexPositionBuffer</v>.<cpr>itemSize</cpr>, <v>gl</v>.<npr>FLOAT</npr>, <no>false</no>, <no>0</no>, <no>0</no>)</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Send the changes to the shader program.
+      </td>
+      <td>
+        <fn>setMatrixUniforms()</fn>;
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Draw the resulting figure.
+      </td>
+      <td>
+        <v>gl</v>.<fn>drawArrays(<v>gl</v>.<npr>TRIANGLE_STRIP</npr>, <no>0</no>, <v>squareVertexPositionBuffer</v>.<cpr>numItems</cpr>)</fn>;
+      </td>
+    </tr>
 </div>
 
 <!-- [/doc.html] -->
