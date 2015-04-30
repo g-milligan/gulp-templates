@@ -87,7 +87,27 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <p>A <strong>vertex shader</strong> is run for every vertex. Use javascript to pass values, to the shader, that the GLSL shader code will process.</p>
   <table>
     <tr>
-      <td></td>
+      <td>
+        <v>gl_Position</v> represents the actual position of each vertex. Imagine that this code is run for every vertex. So assigning a value to <v>gl_Position</v> is
+        assigning values to one of the many vertices.<br /><br />
+        The values in the <v>uPMatrix</v> matrix variable are determined in javascript, then passed to this shader. The same is true for <v>uPMatrix</v> and <v>aVertexPosition</v>.
+        Basically all of the variables (non-static numbers) are determined dynamically in javascript before being passed to this GLSL program. <br /><br />
+        What do the variables represent? <br /><br />
+        <v>uPMatrix</v> = <em>uniform</em> "projection matrix". <br />
+        <v>uMVMatrix</v> = <em>uniform</em> "model view matrix". <br />
+        <v>aVertexPosition</v> = <em>attribute</em>, the position in 3d space. <br /><br />
+        What do the variables do? <br /><br />
+        A "projection matrix" is used, for example, to make things that are far away look proportionally smaller than things close up.
+        Matrices are really good at representing the math required to do this. <br /><br />
+        A "model view matrix" represents the current rotation / move state. Any shape begins with an
+        "identity" matrix, which represents the object without rotation or
+        movement, in a default state. Then, in order to move or rotate the object,
+        other matrices are used to calculte the transformation.
+        The current state is represented by the "model view matrix".
+        The natural state is represented by an "identity matrix".<br /><br />
+        Javascript applies transformations to <v>aVertexPosition</v> that are used to calculate a new "model view matrix".
+        In this case, the shape is being scooted to the right or left to share the space with the other shape.
+      </td>
       <td>
         <dk>attribute vec3</dk> <v>aVertexPosition</v>; <br />
         <dk>uniform mat4</dk> <v>uMVMatrix</v>; <br />
@@ -104,7 +124,13 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
   <p>A <strong>fragment shader</strong> is run for every "fragment" or pixel <em>between</em> the vertices. Use javascript to pass values, to the shader, that the GLSL shader code will process.</p>
   <table>
     <tr>
-      <td></td>
+      <td>
+        Fragment shaders are applied to every fragment (pixel) the same way vertex shaders are applied to every vertex.<br /><br />
+        Whatever value you assign to <v>gl_FragColor</v> will be assigned to one of the pixels that appear on screen.
+        In this example, <fn>vec4(<no>1.0, 1.0, 1.0, 1.0</no>)</fn> represents a color (opaque white). <br /><br />
+        <fn>vec4(<no>RED, GREEN, BLUE, ALPHA/OPACITY</no>)</fn> <br /><br />
+        Fragments shaders process the spaces <em>between vertices</em>. This type of <em>filling in</em> is called "linear interpolation".
+      </td>
       <td>
         <dk>precision mediump float</dk>; <br />
         <dk>void</dk> <fn>main(<dk>void</dk>)</fn> { <br />
